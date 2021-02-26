@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import os
+import pickle
 
 from scipy.special import softmax
 
@@ -11,8 +12,14 @@ class hd_module:
         self.num_sensors = 7
         self.num_actuators = 4
         self.sensor_weight = 1
-        self.threshold_known = 0.1
+        self.threshold_known = 0.08
         self.softmax_param = 7.79
+
+        # method 1, 2, 3
+        self.encoding_method = self.encodeing_method_helper(3)
+
+        self.output_vectors = []
+        self.output_actuators = []
 
         self.outdir = './data/'
         if not os.path.exists(self.outdir):
@@ -146,8 +153,13 @@ class hd_module:
         probs = softmax(dists/np.max(dists)*softmax_param)
         #print(dists)
         #print(probs)
-        
+
         return np.random.choice(4, p = probs)
+
+    def encodeing_method_helper(self, method):
+        if method==1:
+            return self.encode_sensors
+        return lambda sensor_in, train: self.encode_sensors_directional(sensor_in, train, method)
 
         #method 1
     def encode_sensors(self, sensor_in, train):
@@ -204,8 +216,8 @@ class hd_module:
         return self.hd_threshold(last_vec + sensor_vec + dist_vec)
 
 
-        #methods 2 and 3
-    def encode_sensors_directional(self, sensor_in, train):
+    #methods 2 and 3
+    def encode_sensors_directional(self, sensor_in, train, method):
         # Encode sensory data into HD space
         # Currently binds together all sensor inputs
         # inputs:
@@ -258,11 +270,12 @@ class hd_module:
 #            return self.hd_threshold(last_vec + sensor_vec + dist_vec)
         #random_vec = np.squeeze(self.create_bipolar_mem(1,self.dim))
 
-        ## method 2
-        #return self.hd_threshold(xsense + ysense + last_vec)
-
-        ## method 3
-        return self.hd_mul(self.hd_mul(xsensors,ysensors), self.hd_threshold(xdist_vec + ydist_vec + last_vec))
+        if method==2:
+            ## method 2
+            return self.hd_threshold(xsense + ysense + last_vec)
+        elif method==3:
+            ## method 3
+            return self.hd_mul(self.hd_mul(xsensors,ysensors), self.hd_threshold(xdist_vec + ydist_vec + last_vec))
 
 
 
@@ -285,7 +298,7 @@ class hd_module:
 
         #for method 1, use encode_sensors
         #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
-        sensor_vec = self.encode_sensors_directional(sensor_in,True)
+        sensor_vec = self.encoding_method(sensor_in,True)
         if self.new_condition(sensor_vec, self.threshold_known):
             act_vec = self.hd_actuator_vals[act_in,:]
             sample_vec = self.hd_mul(sensor_vec,act_vec)
@@ -306,7 +319,7 @@ class hd_module:
 
         #for method 1, use encode_sensors
         #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
-        sensor_vec = self.encode_sensors_directional(sensor_in,False)
+        sensor_vec = self.encoding_method(sensor_in,False)
         #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
         unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec)
         #act_out = self.search_actuator_vals(unbind_vec)
@@ -333,7 +346,17 @@ class hd_module:
 #        self.hd_program_vec = self.hd_threshold(program_vec_b4thresh)
         for sample in range(n_samples):
             sample_vec = self.train_sample(sensor_vals[sample,:],actuator_vals[sample])
+            if any(sample_vec):
+                self.output_vectors.append(sample_vec)
+                self.output_actuators.append(actuator_vals[sample])
             self.hd_program_vec = self.hd_program_vec + sample_vec
+
+        pickle_vectors = open('output_vectors.pckl', 'wb')
+        pickle_actuators = open('output_actuators.pckl', 'wb')
+        pickle.dump(self.output_vectors, pickle_vectors)
+        pickle.dump(self.output_actuators, pickle_actuators)
+        pickle_vectors.close()
+        pickle_actuators.close()
 
         return
 
@@ -368,3 +391,10 @@ class hd_module:
             valid = True
 
         return valid
+
+
+
+
+
+
+

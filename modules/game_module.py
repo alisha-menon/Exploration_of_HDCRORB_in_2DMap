@@ -32,7 +32,7 @@ class game_module:
         self.num_thrown = self.hd_module.num_thrown
 
         self.outdir = './data/'
-        self.outfile = self.outdir + 'game_dat.out'
+        self.outfile = self.outdir + 'game_data_random.out'
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir)
 
@@ -50,6 +50,7 @@ class game_module:
 
         self.pos = [obs_idx[-1]//self.world_size[0], obs_idx[-1]%self.world_size[1]]
         self.random_goal_location()
+        self.steps = 0
         return
 
     def train_from_file(self, filename):
@@ -93,6 +94,8 @@ class game_module:
                     elif event.key == pygame.K_DOWN:
                         self.pos[1] += 1
                         actuator = 3
+                    elif event.key == pygame.K_RETURN:
+                        self.setup_game()
 
 
                     if (self.check_collision(self.pos[0], self.pos[1])):
@@ -124,7 +127,7 @@ class game_module:
     def set_threshold_known(self,threshold_known):
         self.hd_module.threshold_known = threshold_known
         return
-    
+
     def set_softmax_param(self,softmax_param):
         self.hd_module.softmax_param = softmax_param
         return
@@ -149,6 +152,9 @@ class game_module:
                     if event.type == pygame.QUIT:
                         running = False
                         not_crash = False
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            self.setup_game()
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
