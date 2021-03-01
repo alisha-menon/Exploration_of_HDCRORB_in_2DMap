@@ -1,0 +1,12 @@
+Local binary patterns:
+- 1-bit delta ADC
+
+Federated learning
+
+K-means clustering of raw hypervectors to find centroids
+- possibly multiple centroids per label
+- can get different sub-types of labels, e.g. starting fist, holding fist, etc.
+
+FPGA implementation
+
+Push the number of channels to 96 or 128
