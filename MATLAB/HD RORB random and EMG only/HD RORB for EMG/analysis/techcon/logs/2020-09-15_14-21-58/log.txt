@@ -1,0 +1,92 @@
+Model parameters: 
+Feature function: std
+Model dimension: 10000
+Model N-length: 5
+Model feature period: 500
+
+
+Running subject 2
+Getting individual session accuracies: 
+14:21:58 -- Session 1 accuracy, subject 2: gathering features
+14:21:58 -- Session 1 accuracy, subject 2: training overall model
+14:22:00 -- Session 1 accuracy, subject 2: testing model, one-shot
+
+14:22:04 -- Session 1 accuracy, subject 2: *** one-shot accuracy = 81.3462%
+
+14:22:04 -- Session 1 accuracy, subject 2: testing model, three-shot
+
+14:22:07 -- Session 1 accuracy, subject 2: *** three-shot accuracy = 94.9038%
+
+14:22:07 -- Session 2 accuracy, subject 2: gathering features
+14:22:07 -- Session 2 accuracy, subject 2: training overall model
+14:22:09 -- Session 2 accuracy, subject 2: testing model, one-shot
+
+14:22:11 -- Session 2 accuracy, subject 2: *** one-shot accuracy = 84.0625%
+
+14:22:11 -- Session 2 accuracy, subject 2: testing model, three-shot
+
+14:22:13 -- Session 2 accuracy, subject 2: *** three-shot accuracy = 93.4375%
+
+14:22:13 -- Session 3 accuracy, subject 2: gathering features
+14:22:13 -- Session 3 accuracy, subject 2: training overall model
+14:22:16 -- Session 3 accuracy, subject 2: testing model, one-shot
+
+14:22:19 -- Session 3 accuracy, subject 2: *** one-shot accuracy = 86.7308%
+
+14:22:19 -- Session 3 accuracy, subject 2: testing model, three-shot
+
+14:22:23 -- Session 3 accuracy, subject 2: *** three-shot accuracy = 94.7115%
+
+14:22:23 -- Session 4 accuracy, subject 2: gathering features
+14:22:23 -- Session 4 accuracy, subject 2: training overall model
+14:22:25 -- Session 4 accuracy, subject 2: testing model, one-shot
+
+14:22:27 -- Session 4 accuracy, subject 2: *** one-shot accuracy = 99.0278%
+
+14:22:28 -- Session 4 accuracy, subject 2: testing model, three-shot
+
+14:22:30 -- Session 4 accuracy, subject 2: *** three-shot accuracy = 100%
+
+14:22:30 -- Session 5 accuracy, subject 2: gathering features
+14:22:30 -- Session 5 accuracy, subject 2: training overall model
+14:22:32 -- Session 5 accuracy, subject 2: testing model, one-shot
+
+14:22:35 -- Session 5 accuracy, subject 2: *** one-shot accuracy = 100%
+
+14:22:35 -- Session 5 accuracy, subject 2: testing model, three-shot
+
+14:22:37 -- Session 5 accuracy, subject 2: *** three-shot accuracy = 100%
+
+14:22:37 -- Session 6 accuracy, subject 2: gathering features
+14:22:37 -- Session 6 accuracy, subject 2: training overall model
+14:22:39 -- Session 6 accuracy, subject 2: testing model, one-shot
+
+14:22:42 -- Session 6 accuracy, subject 2: *** one-shot accuracy = 88.4722%
+
+14:22:42 -- Session 6 accuracy, subject 2: testing model, three-shot
+
+14:22:44 -- Session 6 accuracy, subject 2: *** three-shot accuracy = 94.3056%
+
+14:22:44 -- Session 7 accuracy, subject 2: gathering features
+14:22:45 -- Session 7 accuracy, subject 2: training overall model
+14:22:47 -- Session 7 accuracy, subject 2: testing model, one-shot
+
+14:22:51 -- Session 7 accuracy, subject 2: *** one-shot accuracy = 88.5577%
+
+14:22:51 -- Session 7 accuracy, subject 2: testing model, three-shot
+
+14:22:55 -- Session 7 accuracy, subject 2: *** three-shot accuracy = 96.1538%
+
+14:22:55 -- Session 8 accuracy, subject 2: gathering features
+14:22:55 -- Session 8 accuracy, subject 2: training overall model
+14:22:58 -- Session 8 accuracy, subject 2: testing model, one-shot
+
+14:23:01 -- Session 8 accuracy, subject 2: *** one-shot accuracy = 95.0962%
+
+14:23:01 -- Session 8 accuracy, subject 2: testing model, three-shot
+
+14:23:05 -- Session 8 accuracy, subject 2: *** three-shot accuracy = 100%
+
+14:23:05 -- Session 9 accuracy, subject 2: gathering features
+14:23:06 -- Session 9 accuracy, subject 2: training overall model
+14:23:08 -- Session 9 accuracy, subject 2: testing model, one-shot

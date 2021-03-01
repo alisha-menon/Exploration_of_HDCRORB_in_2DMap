@@ -1,0 +1,402 @@
+Model parameters: 
+Feature function: std
+Model dimension: 10000
+Model N-length: 5
+Model feature period: 50
+
+
+Running subject 1
+Getting individual session accuracies: 
+00:47:02 -- Session 1 accuracy, subject 1: gathering features
+00:47:05 -- Session 1 accuracy, subject 1: training overall model
+00:47:56 -- Session 1 accuracy, subject 1: testing model, one-shot
+
+00:49:13 -- Session 1 accuracy, subject 1: *** one-shot accuracy = 95.086%
+
+00:49:14 -- Session 1 accuracy, subject 1: testing model, two-shot
+
+00:50:38 -- Session 1 accuracy, subject 1: *** two-shot accuracy = 96.5047%
+
+00:50:39 -- Session 1 accuracy, subject 1: testing model, three-shot
+
+00:51:50 -- Session 1 accuracy, subject 1: *** three-shot accuracy = 97.1255%
+
+00:51:51 -- Session 1 accuracy, subject 1: testing model, four-shot
+
+00:52:47 -- Session 1 accuracy, subject 1: *** four-shot accuracy = 97.4494%
+
+00:52:48 -- Session 2 accuracy, subject 1: gathering features
+00:52:50 -- Session 2 accuracy, subject 1: training overall model
+00:53:21 -- Session 2 accuracy, subject 1: testing model, one-shot
+
+00:54:01 -- Session 2 accuracy, subject 1: *** one-shot accuracy = 90.551%
+
+00:54:01 -- Session 2 accuracy, subject 1: testing model, two-shot
+
+00:54:45 -- Session 2 accuracy, subject 1: *** two-shot accuracy = 95.9978%
+
+00:54:46 -- Session 2 accuracy, subject 1: testing model, three-shot
+
+00:55:27 -- Session 2 accuracy, subject 1: *** three-shot accuracy = 96.8668%
+
+00:55:27 -- Session 2 accuracy, subject 1: testing model, four-shot
+
+00:56:01 -- Session 2 accuracy, subject 1: *** four-shot accuracy = 98.5197%
+
+00:56:01 -- Session 3 accuracy, subject 1: gathering features
+00:56:04 -- Session 3 accuracy, subject 1: training overall model
+00:56:54 -- Session 3 accuracy, subject 1: testing model, one-shot
+
+00:58:05 -- Session 3 accuracy, subject 1: *** one-shot accuracy = 96.7561%
+
+00:58:05 -- Session 3 accuracy, subject 1: testing model, two-shot
+
+00:59:27 -- Session 3 accuracy, subject 1: *** two-shot accuracy = 98.3333%
+
+00:59:27 -- Session 3 accuracy, subject 1: testing model, three-shot
+
+01:00:38 -- Session 3 accuracy, subject 1: *** three-shot accuracy = 98.8715%
+
+01:00:39 -- Session 3 accuracy, subject 1: testing model, four-shot
+
+01:01:35 -- Session 3 accuracy, subject 1: *** four-shot accuracy = 98.7247%
+
+01:01:35 -- Session 7 accuracy, subject 1: gathering features
+01:01:38 -- Session 7 accuracy, subject 1: training overall model
+01:02:29 -- Session 7 accuracy, subject 1: testing model, one-shot
+
+01:03:40 -- Session 7 accuracy, subject 1: *** one-shot accuracy = 94.7925%
+
+01:03:40 -- Session 7 accuracy, subject 1: testing model, two-shot
+
+01:05:02 -- Session 7 accuracy, subject 1: *** two-shot accuracy = 97.0884%
+
+01:05:02 -- Session 7 accuracy, subject 1: testing model, three-shot
+
+01:06:14 -- Session 7 accuracy, subject 1: *** three-shot accuracy = 97.7682%
+
+01:06:14 -- Session 7 accuracy, subject 1: testing model, four-shot
+
+01:07:10 -- Session 7 accuracy, subject 1: *** four-shot accuracy = 97.9555%
+
+01:07:11 -- Session 8 accuracy, subject 1: gathering features
+01:07:14 -- Session 8 accuracy, subject 1: training overall model
+01:08:04 -- Session 8 accuracy, subject 1: testing model, one-shot
+
+01:09:16 -- Session 8 accuracy, subject 1: *** one-shot accuracy = 97.0648%
+
+01:09:16 -- Session 8 accuracy, subject 1: testing model, two-shot
+
+01:10:37 -- Session 8 accuracy, subject 1: *** two-shot accuracy = 97.9555%
+
+01:10:37 -- Session 8 accuracy, subject 1: testing model, three-shot
+
+01:11:48 -- Session 8 accuracy, subject 1: *** three-shot accuracy = 98.1275%
+
+01:11:49 -- Session 8 accuracy, subject 1: testing model, four-shot
+
+01:12:45 -- Session 8 accuracy, subject 1: *** four-shot accuracy = 98.2186%
+
+01:12:45 -- Baseline accuracy, subject 1: gathering features
+01:12:49 -- Baseline accuracy, subject 1: training overall model
+01:14:11 -- Baseline accuracy, subject 1: testing model, one-shot
+
+01:16:23 -- Baseline accuracy, subject 1: *** one-shot accuracy = 90.7112%
+
+01:16:23 -- Baseline accuracy, subject 1: testing model, two-shot
+
+01:19:00 -- Baseline accuracy, subject 1: *** two-shot accuracy = 94.1667%
+
+01:19:01 -- Baseline accuracy, subject 1: testing model, three-shot
+
+01:21:12 -- Baseline accuracy, subject 1: *** three-shot accuracy = 94.7306%
+
+01:21:12 -- Baseline accuracy, subject 1: testing model, four-shot
+
+01:22:47 -- Baseline accuracy, subject 1: *** four-shot accuracy = 95.6391%
+
+01:22:47 -- Arm position accuracy, subject 1: gathering training features
+01:22:50 -- Arm position accuracy, subject 1: gathering testing features
+01:22:53 -- Arm position accuracy, subject 1: training overall old model
+01:23:42 -- Arm position accuracy, subject 1: testing old model, one-shot
+
+01:24:58 -- Arm position accuracy, subject 1: *** one-shot accuracy = 65.7571%
+
+01:24:59 -- Arm position accuracy, subject 1: testing old model, two-shot
+
+01:26:39 -- Arm position accuracy, subject 1: *** two-shot accuracy = 66.585%
+
+01:26:39 -- Arm position accuracy, subject 1: testing old model, three-shot
+
+01:28:19 -- Arm position accuracy, subject 1: *** three-shot accuracy = 67.164%
+
+01:28:20 -- Arm position accuracy, subject 1: testing old model, four-shot
+
+01:29:36 -- Arm position accuracy, subject 1: *** four-shot accuracy = 67.3725%
+
+01:29:36 -- Arm position accuracy, subject 1: testing old model, five-shot
+
+01:30:33 -- Arm position accuracy, subject 1: *** five-shot accuracy = 67.6113%
+
+01:30:33 -- Arm position accuracy, subject 1: training model for new context
+01:31:23 -- Arm position accuracy, subject 1: testing combined models, 1 old, 1 new
+01:36:20 -- Arm position accuracy, subject 1: *** new context combined accuracy = 91.2966%
+
+01:36:25 -- Arm position accuracy, subject 1: *** old context combined accuracy = 91.7348%
+
+01:36:26 -- Different day accuracy, subject 1: gathering training features
+01:36:28 -- Different day accuracy, subject 1: gathering testing features
+01:36:31 -- Different day accuracy, subject 1: training overall old model
+01:37:21 -- Different day accuracy, subject 1: testing old model, one-shot
+
+01:38:36 -- Different day accuracy, subject 1: *** one-shot accuracy = 64.17%
+
+01:38:37 -- Different day accuracy, subject 1: testing old model, two-shot
+
+01:40:17 -- Different day accuracy, subject 1: *** two-shot accuracy = 66.4534%
+
+01:40:17 -- Different day accuracy, subject 1: testing old model, three-shot
+
+01:41:57 -- Different day accuracy, subject 1: *** three-shot accuracy = 67.7004%
+
+01:41:58 -- Different day accuracy, subject 1: testing old model, four-shot
+
+01:43:13 -- Different day accuracy, subject 1: *** four-shot accuracy = 68.5466%
+
+01:43:14 -- Different day accuracy, subject 1: testing old model, five-shot
+
+01:44:10 -- Different day accuracy, subject 1: *** five-shot accuracy = 68.9879%
+
+01:44:10 -- Different day accuracy, subject 1: training model for new context
+01:45:00 -- Different day accuracy, subject 1: testing combined models, 1 old, 1 new
+01:49:57 -- Different day accuracy, subject 1: *** new context combined accuracy = 89.1468%
+
+01:50:02 -- Different day accuracy, subject 1: *** old context combined accuracy = 87.9089%
+
+01:50:03 -- Prolong accuracy, subject 1: gathering training features
+01:50:05 -- Prolong accuracy, subject 1: gathering testing features
+01:50:08 -- Prolong accuracy, subject 1: training overall old model
+01:50:58 -- Prolong accuracy, subject 1: testing old model, one-shot
+
+01:52:14 -- Prolong accuracy, subject 1: *** one-shot accuracy = 87.2915%
+
+01:52:14 -- Prolong accuracy, subject 1: testing old model, two-shot
+
+01:53:54 -- Prolong accuracy, subject 1: *** two-shot accuracy = 87.7551%
+
+01:53:54 -- Prolong accuracy, subject 1: testing old model, three-shot
+
+01:55:35 -- Prolong accuracy, subject 1: *** three-shot accuracy = 88.4312%
+
+01:55:35 -- Prolong accuracy, subject 1: testing old model, four-shot
+
+01:56:51 -- Prolong accuracy, subject 1: *** four-shot accuracy = 88.5628%
+
+01:56:51 -- Prolong accuracy, subject 1: testing old model, five-shot
+
+01:57:47 -- Prolong accuracy, subject 1: *** five-shot accuracy = 88.7854%
+
+01:57:48 -- Prolong accuracy, subject 1: training model for new context
+01:58:37 -- Prolong accuracy, subject 1: testing combined models, 1 old, 1 new
+02:03:33 -- Prolong accuracy, subject 1: *** new context combined accuracy = 96.8907%
+
+02:03:38 -- Prolong accuracy, subject 1: *** old context combined accuracy = 94.8522%
+
+
+Running subject 2
+Getting individual session accuracies: 
+02:03:39 -- Session 1 accuracy, subject 2: gathering features
+02:03:42 -- Session 1 accuracy, subject 2: training overall model
+02:04:32 -- Session 1 accuracy, subject 2: testing model, one-shot
+
+02:05:43 -- Session 1 accuracy, subject 2: *** one-shot accuracy = 95.7895%
+
+02:05:43 -- Session 1 accuracy, subject 2: testing model, two-shot
+
+02:07:04 -- Session 1 accuracy, subject 2: *** two-shot accuracy = 98.0196%
+
+02:07:04 -- Session 1 accuracy, subject 2: testing model, three-shot
+
+02:08:15 -- Session 1 accuracy, subject 2: *** three-shot accuracy = 98.2591%
+
+02:08:15 -- Session 1 accuracy, subject 2: testing model, four-shot
+
+02:09:11 -- Session 1 accuracy, subject 2: *** four-shot accuracy = 98.3198%
+
+02:09:11 -- Session 2 accuracy, subject 2: gathering features
+02:09:13 -- Session 2 accuracy, subject 2: training overall model
+02:09:44 -- Session 2 accuracy, subject 2: testing model, one-shot
+
+02:10:23 -- Session 2 accuracy, subject 2: *** one-shot accuracy = 96.4885%
+
+02:10:23 -- Session 2 accuracy, subject 2: testing model, two-shot
+
+02:11:06 -- Session 2 accuracy, subject 2: *** two-shot accuracy = 96.875%
+
+02:11:06 -- Session 2 accuracy, subject 2: testing model, three-shot
+
+02:11:46 -- Session 2 accuracy, subject 2: *** three-shot accuracy = 96.9655%
+
+02:11:46 -- Session 2 accuracy, subject 2: testing model, four-shot
+
+02:12:19 -- Session 2 accuracy, subject 2: *** four-shot accuracy = 97.1053%
+
+02:12:20 -- Session 3 accuracy, subject 2: gathering features
+02:12:22 -- Session 3 accuracy, subject 2: training overall model
+02:13:12 -- Session 3 accuracy, subject 2: testing model, one-shot
+
+02:14:23 -- Session 3 accuracy, subject 2: *** one-shot accuracy = 95.2834%
+
+02:14:23 -- Session 3 accuracy, subject 2: testing model, two-shot
+
+02:15:44 -- Session 3 accuracy, subject 2: *** two-shot accuracy = 97.1188%
+
+02:15:44 -- Session 3 accuracy, subject 2: testing model, three-shot
+
+02:16:55 -- Session 3 accuracy, subject 2: *** three-shot accuracy = 97.8644%
+
+02:16:55 -- Session 3 accuracy, subject 2: testing model, four-shot
+
+02:17:52 -- Session 3 accuracy, subject 2: *** four-shot accuracy = 98.0972%
+
+02:17:52 -- Session 7 accuracy, subject 2: gathering features
+02:17:55 -- Session 7 accuracy, subject 2: training overall model
+02:18:44 -- Session 7 accuracy, subject 2: testing model, one-shot
+
+02:19:55 -- Session 7 accuracy, subject 2: *** one-shot accuracy = 99.251%
+
+02:19:55 -- Session 7 accuracy, subject 2: testing model, two-shot
+
+02:21:16 -- Session 7 accuracy, subject 2: *** two-shot accuracy = 99.5378%
+
+02:21:16 -- Session 7 accuracy, subject 2: testing model, three-shot
+
+02:22:27 -- Session 7 accuracy, subject 2: *** three-shot accuracy = 99.666%
+
+02:22:27 -- Session 7 accuracy, subject 2: testing model, four-shot
+
+02:23:23 -- Session 7 accuracy, subject 2: *** four-shot accuracy = 99.7571%
+
+02:23:23 -- Session 8 accuracy, subject 2: gathering features
+02:23:26 -- Session 8 accuracy, subject 2: training overall model
+02:24:16 -- Session 8 accuracy, subject 2: testing model, one-shot
+
+02:25:27 -- Session 8 accuracy, subject 2: *** one-shot accuracy = 99.1802%
+
+02:25:27 -- Session 8 accuracy, subject 2: testing model, two-shot
+
+02:26:48 -- Session 8 accuracy, subject 2: *** two-shot accuracy = 99.7638%
+
+02:26:48 -- Session 8 accuracy, subject 2: testing model, three-shot
+
+02:27:59 -- Session 8 accuracy, subject 2: *** three-shot accuracy = 99.8077%
+
+02:27:59 -- Session 8 accuracy, subject 2: testing model, four-shot
+
+02:28:55 -- Session 8 accuracy, subject 2: *** four-shot accuracy = 99.8178%
+
+02:28:55 -- Baseline accuracy, subject 2: gathering features
+02:29:00 -- Baseline accuracy, subject 2: training overall model
+02:30:20 -- Baseline accuracy, subject 2: testing model, one-shot
+
+02:32:31 -- Baseline accuracy, subject 2: *** one-shot accuracy = 94.8904%
+
+02:32:32 -- Baseline accuracy, subject 2: testing model, two-shot
+
+02:35:08 -- Baseline accuracy, subject 2: *** two-shot accuracy = 96.8108%
+
+02:35:09 -- Baseline accuracy, subject 2: testing model, three-shot
+
+02:37:20 -- Baseline accuracy, subject 2: *** three-shot accuracy = 97.3465%
+
+02:37:21 -- Baseline accuracy, subject 2: testing model, four-shot
+
+02:38:55 -- Baseline accuracy, subject 2: *** four-shot accuracy = 97.5188%
+
+02:38:56 -- Arm position accuracy, subject 2: gathering training features
+02:38:58 -- Arm position accuracy, subject 2: gathering testing features
+02:39:01 -- Arm position accuracy, subject 2: training overall old model
+02:39:51 -- Arm position accuracy, subject 2: testing old model, one-shot
+
+02:41:06 -- Arm position accuracy, subject 2: *** one-shot accuracy = 82.8907%
+
+02:41:06 -- Arm position accuracy, subject 2: testing old model, two-shot
+
+02:42:46 -- Arm position accuracy, subject 2: *** two-shot accuracy = 84.3381%
+
+02:42:47 -- Arm position accuracy, subject 2: testing old model, three-shot
+
+02:44:27 -- Arm position accuracy, subject 2: *** three-shot accuracy = 85.0547%
+
+02:44:27 -- Arm position accuracy, subject 2: testing old model, four-shot
+
+02:45:43 -- Arm position accuracy, subject 2: *** four-shot accuracy = 85.3765%
+
+02:45:43 -- Arm position accuracy, subject 2: testing old model, five-shot
+
+02:46:39 -- Arm position accuracy, subject 2: *** five-shot accuracy = 85.4656%
+
+02:46:40 -- Arm position accuracy, subject 2: training model for new context
+02:47:29 -- Arm position accuracy, subject 2: testing combined models, 1 old, 1 new
+02:52:28 -- Arm position accuracy, subject 2: *** new context combined accuracy = 93.5051%
+
+02:52:33 -- Arm position accuracy, subject 2: *** old context combined accuracy = 96.1953%
+
+02:52:34 -- Different day accuracy, subject 2: gathering training features
+02:52:37 -- Different day accuracy, subject 2: gathering testing features
+02:52:39 -- Different day accuracy, subject 2: training overall old model
+02:53:29 -- Different day accuracy, subject 2: testing old model, one-shot
+
+02:54:45 -- Different day accuracy, subject 2: *** one-shot accuracy = 93.1255%
+
+02:54:45 -- Different day accuracy, subject 2: testing old model, two-shot
+
+02:56:25 -- Different day accuracy, subject 2: *** two-shot accuracy = 94.1943%
+
+02:56:25 -- Different day accuracy, subject 2: testing old model, three-shot
+
+02:58:05 -- Different day accuracy, subject 2: *** three-shot accuracy = 94.6215%
+
+02:58:06 -- Different day accuracy, subject 2: testing old model, four-shot
+
+02:59:21 -- Different day accuracy, subject 2: *** four-shot accuracy = 95.0526%
+
+02:59:22 -- Different day accuracy, subject 2: testing old model, five-shot
+
+03:00:18 -- Different day accuracy, subject 2: *** five-shot accuracy = 95.1012%
+
+03:00:18 -- Different day accuracy, subject 2: training model for new context
+03:01:07 -- Different day accuracy, subject 2: testing combined models, 1 old, 1 new
+03:06:03 -- Different day accuracy, subject 2: *** new context combined accuracy = 99.1215%
+
+03:06:09 -- Different day accuracy, subject 2: *** old context combined accuracy = 98.0789%
+
+03:06:09 -- Prolong accuracy, subject 2: gathering training features
+03:06:12 -- Prolong accuracy, subject 2: gathering testing features
+03:06:15 -- Prolong accuracy, subject 2: training overall old model
+03:07:04 -- Prolong accuracy, subject 2: testing old model, one-shot
+
+03:08:20 -- Prolong accuracy, subject 2: *** one-shot accuracy = 99.2955%
+
+03:08:20 -- Prolong accuracy, subject 2: testing old model, two-shot
+
+03:10:00 -- Prolong accuracy, subject 2: *** two-shot accuracy = 99.6559%
+
+03:10:00 -- Prolong accuracy, subject 2: testing old model, three-shot
+
+03:11:40 -- Prolong accuracy, subject 2: *** three-shot accuracy = 99.7591%
+
+03:11:41 -- Prolong accuracy, subject 2: testing old model, four-shot
+
+03:12:56 -- Prolong accuracy, subject 2: *** four-shot accuracy = 99.7611%
+
+03:12:57 -- Prolong accuracy, subject 2: testing old model, five-shot
+
+03:13:53 -- Prolong accuracy, subject 2: *** five-shot accuracy = 99.7773%
+
+03:13:53 -- Prolong accuracy, subject 2: training model for new context
+03:14:43 -- Prolong accuracy, subject 2: testing combined models, 1 old, 1 new
+03:19:39 -- Prolong accuracy, subject 2: *** new context combined accuracy = 99.6549%
+
+03:19:44 -- Prolong accuracy, subject 2: *** old context combined accuracy = 99.3806%
+

@@ -1,0 +1,9 @@
+Model parameters: 
+Feature function: std
+Model dimension: 10000
+Model N-length: 1
+Model feature period: 500
+
+
+Running subject 2
+21:30:50 -- Baseline accuracy, subject 2: gathering features

@@ -1,0 +1,100 @@
+Model parameters: 
+Feature function: std
+Model dimension: 10000
+Model N-length: 1
+Model feature period: 500
+
+
+Running subject 2
+Getting individual session accuracies: 
+13:09:47 -- Session 1 accuracy, subject 2: gathering features
+14:44:20 -- Session 1 accuracy, subject 2: training overall model
+14:44:21 -- Session 1 accuracy, subject 2: testing model, one-shot
+
+14:44:24 -- Session 1 accuracy, subject 2: *** one-shot accuracy = 83.6538%
+
+14:44:24 -- Session 1 accuracy, subject 2: testing model, three-shot
+
+14:44:27 -- Session 1 accuracy, subject 2: *** three-shot accuracy = 89.8077%
+
+14:44:27 -- Session 2 accuracy, subject 2: gathering features
+14:44:55 -- Session 2 accuracy, subject 2: training overall model
+14:44:56 -- Session 2 accuracy, subject 2: testing model, one-shot
+
+14:44:57 -- Session 2 accuracy, subject 2: *** one-shot accuracy = 91.875%
+
+14:44:57 -- Session 2 accuracy, subject 2: testing model, three-shot
+
+14:44:59 -- Session 2 accuracy, subject 2: *** three-shot accuracy = 94.2969%
+
+14:44:59 -- Session 3 accuracy, subject 2: gathering features
+14:45:16 -- Session 3 accuracy, subject 2: training overall model
+14:45:17 -- Session 3 accuracy, subject 2: testing model, one-shot
+
+14:45:20 -- Session 3 accuracy, subject 2: *** one-shot accuracy = 87.7885%
+
+14:45:20 -- Session 3 accuracy, subject 2: testing model, three-shot
+
+14:45:23 -- Session 3 accuracy, subject 2: *** three-shot accuracy = 89.7115%
+
+14:45:23 -- Session 4 accuracy, subject 2: gathering features
+14:45:23 -- Session 4 accuracy, subject 2: training overall model
+14:45:24 -- Session 4 accuracy, subject 2: testing model, one-shot
+
+14:45:26 -- Session 4 accuracy, subject 2: *** one-shot accuracy = 96.4583%
+
+14:45:26 -- Session 4 accuracy, subject 2: testing model, three-shot
+
+14:45:27 -- Session 4 accuracy, subject 2: *** three-shot accuracy = 97.9861%
+
+14:45:27 -- Session 5 accuracy, subject 2: gathering features
+14:45:28 -- Session 5 accuracy, subject 2: training overall model
+14:45:28 -- Session 5 accuracy, subject 2: testing model, one-shot
+
+14:45:30 -- Session 5 accuracy, subject 2: *** one-shot accuracy = 98.8889%
+
+14:45:30 -- Session 5 accuracy, subject 2: testing model, three-shot
+
+14:45:32 -- Session 5 accuracy, subject 2: *** three-shot accuracy = 99.0972%
+
+14:45:32 -- Session 6 accuracy, subject 2: gathering features
+14:45:32 -- Session 6 accuracy, subject 2: training overall model
+14:45:33 -- Session 6 accuracy, subject 2: testing model, one-shot
+
+14:45:35 -- Session 6 accuracy, subject 2: *** one-shot accuracy = 85.2778%
+
+14:45:35 -- Session 6 accuracy, subject 2: testing model, three-shot
+
+14:45:36 -- Session 6 accuracy, subject 2: *** three-shot accuracy = 88.8194%
+
+14:45:37 -- Session 7 accuracy, subject 2: gathering features
+14:45:37 -- Session 7 accuracy, subject 2: training overall model
+14:45:38 -- Session 7 accuracy, subject 2: testing model, one-shot
+
+14:45:41 -- Session 7 accuracy, subject 2: *** one-shot accuracy = 89.0865%
+
+14:45:41 -- Session 7 accuracy, subject 2: testing model, three-shot
+
+14:45:44 -- Session 7 accuracy, subject 2: *** three-shot accuracy = 92.3077%
+
+14:45:44 -- Session 8 accuracy, subject 2: gathering features
+14:45:45 -- Session 8 accuracy, subject 2: training overall model
+14:45:46 -- Session 8 accuracy, subject 2: testing model, one-shot
+
+14:45:48 -- Session 8 accuracy, subject 2: *** one-shot accuracy = 95.9615%
+
+14:45:49 -- Session 8 accuracy, subject 2: testing model, three-shot
+
+14:45:52 -- Session 8 accuracy, subject 2: *** three-shot accuracy = 98.5577%
+
+14:45:52 -- Session 9 accuracy, subject 2: gathering features
+14:45:52 -- Session 9 accuracy, subject 2: training overall model
+14:45:53 -- Session 9 accuracy, subject 2: testing model, one-shot
+
+14:45:56 -- Session 9 accuracy, subject 2: *** one-shot accuracy = 90.5769%
+
+14:45:56 -- Session 9 accuracy, subject 2: testing model, three-shot
+
+14:45:59 -- Session 9 accuracy, subject 2: *** three-shot accuracy = 93.9423%
+
+14:45:59 -- Baseline accuracy, subject 2: gathering features

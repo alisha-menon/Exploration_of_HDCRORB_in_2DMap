@@ -1,0 +1,11 @@
+Model parameters: 
+Feature function: std
+Model dimension: 11000
+Model N-length: 5
+Model feature period: 500
+
+
+Running subject 2
+19:57:54 -- Session 2 accuracy, subject 2: gathering features
+19:57:54 -- Baseline accuracy, subject 2: training overall model
+19:57:58 -- Baseline accuracy, subject 2: testing model, one-shot

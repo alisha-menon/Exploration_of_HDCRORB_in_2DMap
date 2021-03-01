@@ -16,6 +16,15 @@ class hd_module:
         self.softmax_param = 7.79
 
         # method 1, 2, 3
+<<<<<<< HEAD
+        # want to modify so that given global information prioritize obstacle avoidance, or goal. Specifically see issue where the direction of goal is through an
+        # obstacle, and going around the obstacle means going away from the goal temporarily. The agent is not able to make that choice to go away from goal
+        # temporarily in order to get around an obstacle. Could define 3 states
+        # 1. no obstacle, prioritize goal
+        # 2. There are obstacles, but still want to generally head in direction of goal
+        # 3. Have been stuck in a cycle for the past some_threshold moves, need to set aside goal completely and instead just focus on going away from obstacles
+=======
+>>>>>>> 4f400ce8e38f5271803f195299d116053b6de997
         self.encoding_method = self.encodeing_method_helper(3)
 
         self.output_vectors = []

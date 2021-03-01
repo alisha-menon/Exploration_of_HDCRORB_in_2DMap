@@ -1,0 +1,52 @@
+Model parameters: 
+Feature function: std
+Model dimension: 10000
+Model N-length: 1
+Model feature period: 500
+
+
+Running subject 2
+Getting individual session accuracies: 
+19:11:35 -- Session 1 accuracy, subject 2: gathering features
+19:11:35 -- Session 1 accuracy, subject 2: training overall model
+19:11:36 -- Session 1 accuracy, subject 2: testing model, one-shot
+
+19:11:39 -- Session 1 accuracy, subject 2: *** one-shot accuracy = 83.3173%
+
+19:11:39 -- Session 1 accuracy, subject 2: testing model, three-shot
+
+19:11:42 -- Session 1 accuracy, subject 2: *** three-shot accuracy = 89.5192%
+
+19:11:42 -- Session 2 accuracy, subject 2: gathering features
+19:11:42 -- Session 2 accuracy, subject 2: training overall model
+19:11:43 -- Session 2 accuracy, subject 2: testing model, one-shot
+
+19:11:44 -- Session 2 accuracy, subject 2: *** one-shot accuracy = 91.4844%
+
+19:11:44 -- Session 2 accuracy, subject 2: testing model, three-shot
+
+19:11:45 -- Session 2 accuracy, subject 2: *** three-shot accuracy = 93.8281%
+
+19:11:46 -- Session 3 accuracy, subject 2: gathering features
+19:11:46 -- Session 3 accuracy, subject 2: training overall model
+19:11:47 -- Session 3 accuracy, subject 2: testing model, one-shot
+
+19:11:50 -- Session 3 accuracy, subject 2: *** one-shot accuracy = 88.0769%
+
+19:11:50 -- Session 3 accuracy, subject 2: testing model, three-shot
+
+19:11:53 -- Session 3 accuracy, subject 2: *** three-shot accuracy = 90.1442%
+
+19:11:53 -- Session 4 accuracy, subject 2: gathering features
+19:11:53 -- Session 4 accuracy, subject 2: training overall model
+19:11:54 -- Session 4 accuracy, subject 2: testing model, one-shot
+
+19:11:55 -- Session 4 accuracy, subject 2: *** one-shot accuracy = 96.3889%
+
+19:11:55 -- Session 4 accuracy, subject 2: testing model, three-shot
+
+19:11:57 -- Session 4 accuracy, subject 2: *** three-shot accuracy = 97.7083%
+
+19:11:57 -- Session 5 accuracy, subject 2: gathering features
+19:11:57 -- Session 5 accuracy, subject 2: training overall model
+19:11:58 -- Session 5 accuracy, subject 2: testing model, one-shot

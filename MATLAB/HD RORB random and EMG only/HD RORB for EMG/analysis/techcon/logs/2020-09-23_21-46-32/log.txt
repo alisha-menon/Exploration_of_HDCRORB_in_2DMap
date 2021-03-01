@@ -1,0 +1,35 @@
+Model parameters: 
+Feature function: std
+Model dimension: 10000
+Model N-length: 5
+Model feature period: 500
+
+
+Running subject 2
+21:46:32 -- Session 1 accuracy, subject 2: gathering features
+21:46:32 -- Baseline accuracy, subject 2: training overall model
+21:46:37 -- Baseline accuracy, subject 2: testing model, one-shot
+21:46:45 -- Session 2 accuracy, subject 2: gathering features
+21:46:45 -- Baseline accuracy, subject 2: training overall model
+21:46:48 -- Baseline accuracy, subject 2: testing model, one-shot
+21:46:52 -- Session 3 accuracy, subject 2: gathering features
+21:46:52 -- Baseline accuracy, subject 2: training overall model
+21:46:57 -- Baseline accuracy, subject 2: testing model, one-shot
+21:47:05 -- Session 4 accuracy, subject 2: gathering features
+21:47:05 -- Baseline accuracy, subject 2: training overall model
+21:47:08 -- Baseline accuracy, subject 2: testing model, one-shot
+21:47:13 -- Session 5 accuracy, subject 2: gathering features
+21:47:13 -- Baseline accuracy, subject 2: training overall model
+21:47:17 -- Baseline accuracy, subject 2: testing model, one-shot
+21:47:22 -- Session 6 accuracy, subject 2: gathering features
+21:47:22 -- Baseline accuracy, subject 2: training overall model
+21:47:25 -- Baseline accuracy, subject 2: testing model, one-shot
+21:47:30 -- Session 7 accuracy, subject 2: gathering features
+21:47:31 -- Baseline accuracy, subject 2: training overall model
+21:47:36 -- Baseline accuracy, subject 2: testing model, one-shot
+21:47:45 -- Session 8 accuracy, subject 2: gathering features
+21:47:45 -- Baseline accuracy, subject 2: training overall model
+21:47:51 -- Baseline accuracy, subject 2: testing model, one-shot
+21:47:59 -- Session 9 accuracy, subject 2: gathering features
+21:48:00 -- Baseline accuracy, subject 2: training overall model
+21:48:05 -- Baseline accuracy, subject 2: testing model, one-shot
