@@ -2,7 +2,7 @@ from modules.game_module import game_module
 import numpy as np
 import matplotlib.pyplot as plt
 
-train_file = './data/game_dat.out'
+train_file = './data/game_data_2state_based.out'
 #train_file = './data/game_dat_test4.out'
 game_data = np.loadtxt(train_file, dtype = np.int8, delimiter=',')
 n_samples = game_data.shape[0]
@@ -18,8 +18,12 @@ trials = 100
 #thresholds = [0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29]
 #thresholds = [0.29]
 
-thresholds = np.linspace(0,1,11)
+thresholds = np.linspace(0,1,21)
+threshold_state1 = 0.2
+threshold_state2 = 0.08
 softmax_param = 7.79
+softmax_param_state1 = 7.79
+softmax_param_state2 = 7.79
 print(thresholds)
 success=np.empty((len(thresholds),))
 crash=np.empty((len(thresholds),))
@@ -30,7 +34,11 @@ for i,threshold in enumerate(thresholds):
     a = game_module()
     #a.set_sensor_weight(weight)
     a.set_threshold_known(threshold)
+    a.set_threshold_known_state1(threshold_state1)
+    a.set_threshold_known_state2(threshold_state2)
     a.set_softmax_param(softmax_param)
+    a.set_softmax_param_state1(softmax_param_state1)
+    a.set_softmax_param_state2(softmax_param_state2)
     #print(i)
     print(threshold)
     a.train_from_file(train_file)

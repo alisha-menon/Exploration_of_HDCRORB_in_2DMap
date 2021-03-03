@@ -32,7 +32,7 @@ class game_module:
         self.num_thrown = self.hd_module.num_thrown
 
         self.outdir = './data/'
-        self.outfile = self.outdir + 'game_data_random.out'
+        self.outfile = self.outdir + 'game_data_2state_based.out'
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir)
 
@@ -54,7 +54,7 @@ class game_module:
         return
 
     def train_from_file(self, filename):
-        self.hd_module.train_from_file(filename)
+        self.hd_module.train_from_file(filename) #need to put state information into new training data file
         self.num_cond = self.hd_module.num_cond
         self.num_thrown = self.hd_module.num_thrown
 
@@ -69,6 +69,8 @@ class game_module:
         not_crash = True
 
         actuator = 0
+        state1_count = 0
+        state2_count = 0
         while running:
             self.setup_game()
             while not_crash:
@@ -82,6 +84,9 @@ class game_module:
                 elif event.type == pygame.KEYDOWN:
                     current_sensor = self.get_sensor()
                     current_sensor.append(actuator)
+                    #add state information
+                    current_sensor.append(self.check_state(self.pos[0],self.pos[1]))
+                    #print(self.check_state(self.pos[0],self.pos[1]))
                     if event.key == pygame.K_LEFT:
                         self.pos[0] -= 1
                         actuator = 0
@@ -102,15 +107,24 @@ class game_module:
                         not_crash = False
                     else:
 # *********************** CHANGE BASED ON SENSOR DATA *************************
-                        sensor_str = "{}, {}, {}, {}, {}, {}, {}".format(*current_sensor)
+                        sensor_str = "{}, {}, {}, {}, {}, {}, {}, {}".format(*current_sensor)
                         f.write(sensor_str + ", " + str(actuator) + "\n")
 # *****************************************************************************
+                        if current_sensor[7]==1:
+                            print("state 1 move was made\n")
+                            state1_count += 1
+                        else:
+                            print("state 2 move was made\n")
+                            state2_count += 1
+
                 self.game_step(gametype, screen)
                 pygame.display.update()
 
             event2 = pygame.event.wait()
             if event.type == pygame.QUIT:
                 running = False
+                print("state1 moves\n",state1_count)
+                print("state2 moves\n",state2_count)
             elif event.type == pygame.KEYDOWN:
                 not_crash = True
 
@@ -128,8 +142,24 @@ class game_module:
         self.hd_module.threshold_known = threshold_known
         return
 
+    def set_threshold_known_state1(self,threshold_known):
+        self.hd_module.threshold_known_state1 = threshold_known
+        return
+
+    def set_threshold_known_state2(self,threshold_known):
+        self.hd_module.threshold_known_state2 = threshold_known
+        return                
+
     def set_softmax_param(self,softmax_param):
         self.hd_module.softmax_param = softmax_param
+        return
+
+    def set_softmax_para_state1(self,softmax_param):
+        self.hd_module.softmax_param_state1 = softmax_param
+        return
+
+    def set_softmax_param_state2(self,softmax_param):
+        self.hd_module.softmax_param_state2 = softmax_param
         return
 
     def autoplay_game(self, gametype):
@@ -158,7 +188,16 @@ class game_module:
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
-                act_out = self.hd_module.test_sample(current_sensor)
+
+                if self.hd_module.two_states: 
+                    if (self.check_state(self.pos[0],self.pos[1]) == 1):
+                        act_out = self.hd_module.test_sample_state1(current_sensor)
+                    #elif (self.check_state(self.pos[0],self.pos[1])==2):
+                    else:
+                        act_out = self.hd_module.test_sample_state2(current_sensor)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
+
                 if act_out == 0:
                     self.pos[0] -= 1
                 elif act_out == 1:
@@ -212,7 +251,16 @@ class game_module:
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
-                act_out = self.hd_module.test_sample(current_sensor)
+
+                if self.hd_module.two_states: 
+                    if (self.check_state(self.pos[0],self.pos[1]) == 1):
+                        act_out = self.hd_module.test_sample_state1(current_sensor)
+                    #elif (self.check_state(self.pos[0],self.pos[1])==2):
+                    else:
+                        act_out = self.hd_module.test_sample_state2(current_sensor)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
+
                 if act_out == 0:
                     self.pos[0] -= 1
                 elif act_out == 1:
@@ -297,6 +345,27 @@ class game_module:
                 collision = 1
                 #print(collision)
         return collision
+
+    def check_state(self,xpos,ypos):
+        # nothing around means state one, goal oriented behavior
+        anything_around = 1
+        right_xpos = xpos+1
+        right_ypos = ypos
+        left_xpos = xpos-1
+        left_ypos = ypos
+        up_xpos = xpos
+        down_xpos = xpos
+        up_ypos = ypos-1 #for some reason up means decrement
+        down_ypos = ypos + 1
+        #is there anything (edge or obstacle) to the left or right
+        if (self.pos_oob(right_xpos, right_ypos) or self.obs_mat[right_xpos, right_ypos] or self.pos_oob(left_xpos, left_ypos) or self.obs_mat[left_xpos, left_ypos]):
+            anything_around = 2
+        else:
+            #is there anything (edge or obstacle) above or below
+            if (self.pos_oob(up_xpos, up_ypos) or self.obs_mat[up_xpos, up_ypos] or self.pos_oob(down_xpos, down_ypos) or self.obs_mat[down_xpos, down_ypos]):
+                anything_around = 2
+        #if there is anything in any of the four directions, state is 2 and need to trigger obstacle avoidance
+        return anything_around
 
     def random_goal_location(self):
         # Choose random unoccupied square for the goal position
