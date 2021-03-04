@@ -29,7 +29,11 @@ class game_module:
 
         self.hd_module = hd_module()
         self.num_cond = self.hd_module.num_cond
+        self.num_cond_state1 = self.hd_module.num_cond_state1
+        self.num_cond_state2 = self.hd_module.num_cond_state2
         self.num_thrown = self.hd_module.num_thrown
+        self.num_thrown_state1 = self.hd_module.num_thrown_state1
+        self.num_thrown_state2 = self.hd_module.num_thrown_state2
 
         self.outdir = './data/'
         self.outfile = self.outdir + 'game_data_2state_based.out'
@@ -57,6 +61,10 @@ class game_module:
         self.hd_module.train_from_file(filename) #need to put state information into new training data file
         self.num_cond = self.hd_module.num_cond
         self.num_thrown = self.hd_module.num_thrown
+        self.num_cond_state1 = self.hd_module.num_cond_state1
+        self.num_thrown_state1 = self.hd_module.num_thrown_state1       
+        self.num_cond_state2 = self.hd_module.num_cond_state2
+        self.num_thrown_state2 = self.hd_module.num_thrown_state2
 
     def play_game(self, gametype):
         pygame.init()
@@ -154,7 +162,7 @@ class game_module:
         self.hd_module.softmax_param = softmax_param
         return
 
-    def set_softmax_para_state1(self,softmax_param):
+    def set_softmax_param_state1(self,softmax_param):
         self.hd_module.softmax_param_state1 = softmax_param
         return
 

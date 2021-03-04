@@ -13,8 +13,8 @@ class hd_module:
         self.num_actuators = 4
         self.sensor_weight = 1
         self.threshold_known = 0.08
-        self.threshold_known_state1 = 0.2
-        self.threshold_known_state2 = 0.08
+        self.threshold_known_state1 = 0.07
+        self.threshold_known_state2 = 0.09
         self.softmax_param = 7.79
         self.softmax_param_state1 = 7.79
         self.softmax_param_state2 = 7.79
@@ -28,9 +28,9 @@ class hd_module:
         # 3. Have been stuck in a cycle for the past some_threshold moves, need to set aside goal completely and instead just focus on going away from obstacles
         
         #goal method alone = method 4
-        self.encoding_method = self.encodeing_method_helper(4)
-        #set to 1 to use sotmax, set to 0 to not
-        self.activation_function = 0
+        self.encoding_method = self.encodeing_method_helper(3)
+        #set to 1 to use softmax, set to 0 to not
+        self.activation_function = 1
         # set to 1 to activate the two state method 
         self.two_states = 1
 
@@ -267,6 +267,7 @@ class hd_module:
 
         xdist_vec = self.hd_mul(self.hd_sensor_ids[4,:], xval)
         ydist_vec = self.hd_mul(self.hd_sensor_ids[5,:], yval)
+        last_vec = self.hd_sensor_last[sensor_in[6],:]
         dist_vec = self.hd_mul(xdist_vec, ydist_vec)
 
         #last_vec = self.hd_sensor_last[sensor_in[6],:]
@@ -280,7 +281,7 @@ class hd_module:
         #random_vec = np.squeeze(self.create_bipolar_mem(1,self.dim))
 
 
-        return self.hd_threshold(dist_vec)
+        return self.hd_threshold(self.hd_mul(dist_vec,last_vec))
 
 
     #methods 2 and 3
@@ -366,7 +367,7 @@ class hd_module:
         #for method 1, use encode_sensors
         #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
         sensor_vec = self.encoding_method(sensor_in,True)
-        if self.new_condition(sensor_vec, self.threshold_known, hd_cond_vec):
+        if self.new_condition(sensor_vec, self.threshold_known, self.hd_cond_vec):
             act_vec = self.hd_actuator_vals[act_in,:]
             sample_vec = self.hd_mul(sensor_vec,act_vec)
             self.hd_cond_vec += sensor_vec
@@ -455,10 +456,10 @@ class hd_module:
         sensor_vec = self.encode_sensors_goal(sensor_in,True)
         #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
         unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec_state1)
-        if self.activation_function:
-            act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param_state1)
-        else:
-            act_out = self.search_actuator_vals(unbind_vec)
+        #if self.activation_function:
+        #    act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param_state1)
+        #else:
+        act_out = self.search_actuator_vals(unbind_vec)
 
         return act_out
 
@@ -492,6 +493,8 @@ class hd_module:
         sensor_vals = game_data[:,:-1]
         actuator_vals = game_data[:,-1]
         n_samples = game_data.shape[0]
+        state1_count = 0
+        state2_count = 0
 #        program_vec_b4thresh = np.zeros((self.dim,),dtype=np.int8)
 #        for sample in range(n_samples):
 #            sample_vec = self.train_sample(sensor_vals[sample,:],actuator_vals[sample])
@@ -505,9 +508,13 @@ class hd_module:
                 # figure out which state we are in, and train into the correct program vector and condition vector list accordingly
                 state = sensor_vals[sample,7]
                 if state == 1:
+                    state1_count += 1
+                    #print("state1 sample trained!\n")
                     sample_vec = self.train_sample_state1(sensor_vals[sample,:],actuator_vals[sample])
                     self.hd_program_vec_state1 = self.hd_program_vec_state1 + sample_vec
                 else:
+                    state2_count += 1
+                    #print("state2 sample trained!\n")
                     sample_vec = self.train_sample_state2(sensor_vals[sample,:],actuator_vals[sample])
                     self.hd_program_vec_state2 = self.hd_program_vec_state2 + sample_vec                    
         else:
@@ -518,7 +525,8 @@ class hd_module:
                     self.output_actuators.append(actuator_vals[sample])
                 self.hd_program_vec = self.hd_program_vec + sample_vec
 
-
+        print("state1 moves\n",state1_count)
+        print("state2 moves\n",state2_count)        
         pickle_vectors = open('output_vectors.pckl', 'wb')
         pickle_actuators = open('output_actuators.pckl', 'wb')
         pickle.dump(self.output_vectors, pickle_vectors)

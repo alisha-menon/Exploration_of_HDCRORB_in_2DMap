@@ -18,22 +18,58 @@ trials = 100
 #thresholds = [0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29, 0.29]
 #thresholds = [0.29]
 
-thresholds = np.linspace(0,1,21)
-threshold_state1 = 0.2
-threshold_state2 = 0.08
-softmax_param = 7.79
-softmax_param_state1 = 7.79
-softmax_param_state2 = 7.79
-print(thresholds)
+thresholds = np.linspace(0,1,101)
+threshold_nostate = 0.05
+threshold_state1 = 0.16
+threshold_state2 = 0.04
+softmax_param = 10.12
+softmax_param_state1 = 10.12
+softmax_param_state2 = 10.12
+#print(thresholds)
+
+# success = 0
+# crash = 0
+# stuck = 0
+# num_cond = 0
+# num_thrown = 0
+# a = game_module()
+# a.set_threshold_known(threshold)
+# a.set_threshold_known_state1(threshold_state1)
+# a.set_threshold_known_state2(threshold_state2)
+# a.set_softmax_param(softmax_param)
+# a.set_softmax_param_state1(softmax_param_state1)
+# a.set_softmax_param_state2(softmax_param_state2)
+# print(threshold)
+# a.train_from_file(train_file)
+# print("state 1 HDprogHV: ",a.hd_module.hd_program_vec_state1)
+# print("state 2 HDprogHV: ",a.hd_module.hd_program_vec_state2)
+# num_thrown_state1 = a.num_thrown_state1
+# num_cond_state1 = a.num_cond_state1
+# num_thrown_state2 = a.num_thrown_state2
+# num_cond_state2 = a.num_cond_state2
+# print("ratio of thrown samples: ",(num_thrown_state1+num_thrown_state2)/n_samples)
+# print("ratio of trained samples: ",(num_cond_state1+num_thrown_state2)/n_samples)
+# success, crash, stuck = a.test_game(trials)
+# print("ratio of crashed trials: ",crash/trials)
+# print("ratio of stuck trials: ", stuck/trials)
+# print("ratio of successful trials: ", success/trials)
+
+
+
 success=np.empty((len(thresholds),))
 crash=np.empty((len(thresholds),))
 stuck=np.empty((len(thresholds),))
 num_cond_list = np.empty((len(thresholds),))
 num_thrown_list = np.empty((len(thresholds),))
+sum_success = 0
+best_success = 0
+best_threshold = 0
+crashes = 0
+stucks = 0
 for i,threshold in enumerate(thresholds):
     a = game_module()
     #a.set_sensor_weight(weight)
-    a.set_threshold_known(threshold)
+    a.set_threshold_known(threshold_nostate)
     a.set_threshold_known_state1(threshold_state1)
     a.set_threshold_known_state2(threshold_state2)
     a.set_softmax_param(softmax_param)
@@ -49,7 +85,19 @@ for i,threshold in enumerate(thresholds):
     success[i], crash[i], stuck[i] = a.test_game(trials)
     print(crash[i])
     print(stuck[i])
+    sum_success += success[i]/trials
+    if success[i]/trials > best_success:
+        best_success = success[i]/trials
+        best_threshold = threshold
+    crashes += crash[i]
+    stucks += stuck[i]
 print('done with tests')
+
+print("average success rate: ", sum_success/len(thresholds))
+print("average crashes: ", crashes/len(thresholds))
+print("average stuck trials: ", stucks/len(thresholds))
+print("best_threshold: ",best_threshold)
+print("best_success: ",best_success)
 plt.plot(thresholds,success/trials, label='Success')
 plt.plot(thresholds,crash/trials,label='Crash')
 plt.plot(thresholds,stuck/trials,label='Stuck')
@@ -63,7 +111,9 @@ plt.ylabel('Percentage (%)')
 plt.show()
 
 # softmax_params = np.linspace(1,25,101)
-# thresholds = 0.29
+# #threshold = 0.08
+# #threshold_state1 = 0.2
+# #threshold_state2 = 0.08
 # print(softmax_params)
 # success=np.empty((len(softmax_params),))
 # crash=np.empty((len(softmax_params),))
@@ -72,14 +122,20 @@ plt.show()
 # num_thrown_list = np.empty((len(softmax_params),))
 # for i,softmax_param in enumerate(softmax_params):
 #     a = game_module()
+#     softmax_param_state1 = softmax_param
+#     softmax_param_state2 = softmax_param
 #     #a.set_sensor_weight(weight)
-#     a.set_threshold_known(thresholds)
+#     a.set_threshold_known(threshold_nostate)
+#     a.set_threshold_known_state1(threshold_state1)
+#     a.set_threshold_known_state2(threshold_state2)
 #     a.set_softmax_param(softmax_param)
+#     a.set_softmax_param_state1(softmax_param_state1)
+#     a.set_softmax_param_state2(softmax_param_state2)
 #     #print(i)
 #     print(softmax_param)
 #     a.train_from_file(train_file)
-#     num_thrown_list[i] = a.num_thrown
-#     num_cond_list[i] = a.num_cond
+#     num_thrown_list[i] = a.num_thrown_state2 + a.num_thrown_state1
+#     num_cond_list[i] = a.num_cond_state2 + a.num_cond_state1
 #     print(num_thrown_list[i]/n_samples)
 #     print(num_cond_list[i]/n_samples)
 #     success[i], crash[i], stuck[i] = a.test_game(trials)
@@ -97,7 +153,7 @@ plt.show()
 # plt.ylabel('Percentage (%)')
 # plt.show()
 
-#%%
+
 
 
 
