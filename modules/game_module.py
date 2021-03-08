@@ -70,7 +70,6 @@ class game_module:
         pygame.init()
         screen = pygame.display.set_mode(self.pixel_dim)
 
-
         f = open(self.outfile, 'w')
 
         running = True
@@ -81,6 +80,9 @@ class game_module:
         state2_count = 0
         while running:
             self.setup_game()
+            delta_x_buffer=[1]*4
+            delta_y_buffer=[1]*4
+            stuck_buffer=[0]*4
             while not_crash:
                 self.game_step(gametype, screen)
                 pygame.display.update()
@@ -92,6 +94,17 @@ class game_module:
                 elif event.type == pygame.KEYDOWN:
                     current_sensor = self.get_sensor()
                     current_sensor.append(actuator)
+                    print('Current sensor reading is ', current_sensor)
+                    delta_x_buffer.pop(0)
+                    delta_y_buffer.pop(0)
+                    delta_x_buffer.append(current_sensor[4])
+                    delta_y_buffer.append(current_sensor[5])
+
+                    print('x buffer ', delta_x_buffer)
+                    print('y buffer ', delta_y_buffer)
+
+                    self.check_behaviour(delta_x_buffer,delta_y_buffer)
+
                     #add state information
                     current_sensor.append(self.check_state(self.pos[0],self.pos[1]))
                     #print(self.check_state(self.pos[0],self.pos[1]))
@@ -181,6 +194,9 @@ class game_module:
         while running:
             self.setup_game()
             self.steps = 0
+            buffer_x_delta=[1]*4
+            buffer_y_delta=[1]*4
+            stuck_buffer=[0]*4
             while not_crash:
                 self.game_step(gametype, screen)
                 pygame.display.update()
@@ -196,6 +212,22 @@ class game_module:
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
+
+                buffer_x_delta.pop(0)
+                buffer_y_delta.pop(0)
+                buffer_x_delta.append(current_sensor[4])
+                buffer_y_delta.append(current_sensor[5])
+                stuck_buffer.pop(0)
+
+                print('current sensor is ', current_sensor)
+                is_stuck=self.check_behaviour(buffer_x_delta,buffer_y_delta)
+                stuck_buffer.append(is_stuck)
+                print('\nThe stuck buffer is ', stuck_buffer)
+
+                if sum(stuck_buffer)==len(stuck_buffer):
+                    print("!!!!!!!!")
+                    print("STUCK ALERT")
+                    print("!!!!!!!!")
 
                 if self.hd_module.two_states: 
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
@@ -374,6 +406,30 @@ class game_module:
                 anything_around = 2
         #if there is anything in any of the four directions, state is 2 and need to trigger obstacle avoidance
         return anything_around
+
+    #Checks if agent is "stuck" going back and forth in one direction while not progressing in the other
+    def check_behaviour(self, buffer_delta_x, buffer_delta_y):
+        is_stuck = 0
+        print('delta x ', buffer_delta_x)
+        print('delta y ',buffer_delta_y)
+        #The buffers record the last 3 and the current delta in direction
+        #A sum equal to 0 means that the agent went back and forth over 4 time steps
+        sum_buffer_x = sum(buffer_delta_x)
+        sum_buffer_y = sum(buffer_delta_y)
+        #This checks if there was no change in delta for both directions
+        unique_buffer_x = list(set(buffer_delta_x))
+        unique_buffer_y = list(set(buffer_delta_y))
+        # If it has been going back and forth in the x direction
+        if sum_buffer_x == 0 or len(unique_buffer_x)==2:
+            # But made no progress in the y direction
+            if len(unique_buffer_y) == 1:
+                is_stuck = 1
+                print('IT IS STUCK IN THE X DIRECTION!!!!!')
+        if sum_buffer_y == 0 or len(unique_buffer_y)==2 :
+            if len(unique_buffer_x) == 1:
+                is_stuck = 1
+                print('IT IS STUCK IN THE Y DIRECTION!!!!!')
+        return is_stuck
 
     def random_goal_location(self):
         # Choose random unoccupied square for the goal position
