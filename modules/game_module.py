@@ -2,6 +2,8 @@ import pygame
 import random
 import numpy as np
 import os
+import csv
+import time
 
 from modules.hd_module import hd_module
 
@@ -38,20 +40,25 @@ class game_module:
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir)
 
-
-    def setup_game(self):
+    def setup_game(self, obs_id=None, goal_id=None):
         self.obs = []
         self.obs_mat = np.zeros(self.world_size)
-        num_block = self.world_size[0]*self.world_size[1]
-        obs_idx = random.sample(list(range(num_block)), self.num_obs+1)
+        num_block = self.world_size[0] * self.world_size[1]
+        if not obs_id:
+            obs_idx = random.sample(list(range(num_block)), self.num_obs + 1)
+        else:
+            obs_idx = obs_id
         for i in range(self.num_obs):
-            row_pos = obs_idx[i]//self.world_size[0]
-            col_pos = obs_idx[i]%self.world_size[1]
+            row_pos = obs_idx[i] // self.world_size[0]
+            col_pos = obs_idx[i] % self.world_size[1]
             self.obs.append((row_pos, col_pos))
-            self.obs_mat[row_pos,col_pos] = 1
+            self.obs_mat[row_pos, col_pos] = 1
 
-        self.pos = [obs_idx[-1]//self.world_size[0], obs_idx[-1]%self.world_size[1]]
-        self.random_goal_location()
+        self.pos = [obs_idx[-1] // self.world_size[0], obs_idx[-1] % self.world_size[1]]
+        if not goal_id:
+            self.random_goal_location()
+        else:
+            self.goal_pos = goal_id
         self.steps = 0
         return
 
@@ -267,6 +274,80 @@ class game_module:
         pygame.display.quit()
         pygame.quit()
         return
+
+
+    def play_game_from_file(self, test_filename,goal_filename):
+
+        test_reader=csv.reader(open(test_filename,'r'))
+        goal_reader=csv.reader(open(goal_filename,'r'))
+
+        last_act = 0
+
+        success = 0
+        crash = 0
+        stuck = 0
+        step_count=[]
+        stuck_count=[]
+        crash_count=[0]*100
+        stuck_count=[0]*100
+        i=0
+        start=time.time()
+        for env,goal in zip(test_reader,goal_reader):
+            # print('\nNEW ENV')
+            not_crash = True
+            self.setup_game(obs_id=[int(ev) for ev in env],goal_id=[int(go) for go in goal])
+            # self.setup_game(obs_id=[int(ev) for ev in env])
+            # print('Initial position', self.pos)
+            self.steps = 0
+            flag=0
+            while not_crash:
+                if self.goal_pos == self.pos:
+                    success += 1
+                    break
+
+                current_sensor = self.get_sensor()
+                current_sensor.append(last_act)
+                act_out = self.hd_module.test_sample(current_sensor)
+                if act_out == 0:
+                    self.pos[0] -= 1
+                elif act_out == 1:
+                    self.pos[0] += 1
+                elif act_out == 2:
+                    self.pos[1] -= 1
+                elif act_out == 3:
+                    self.pos[1] += 1
+
+                last_act = act_out
+                if (self.check_collision(self.pos[0], self.pos[1])):
+                    not_crash = False
+                    crash += 1
+                    # print('CRASH!')
+                    flag=1
+                    crash_count[i]=1
+                elif (self.steps >= self.timeout):
+                    not_crash = False
+                    stuck += 1
+                    # print('STUCK!')
+                    flag=1
+                    stuck_count[i]=1
+
+                self.steps += 1
+            i+=1
+            # print('It took ', self.steps, ' steps')
+            if flag==1:
+                step_count.append(self.timeout)
+            elif flag==0:
+                step_count.append(self.steps)
+
+        end=time.time()
+
+
+        print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {}".format(success, crash, stuck,end-start,np.mean(np.array(step_count))))
+        print("success rate: {:.2f}".format(success/(success+crash+stuck)))
+        print('step count ', len(step_count), len(crash_count),len(stuck_count))
+        return success,crash,stuck,step_count, crash_count, stuck_count
+
+
 
     def test_game(self, num_test):
         not_crash = True
