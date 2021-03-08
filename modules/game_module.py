@@ -6,22 +6,23 @@ import os
 from modules.hd_module import hd_module
 
 class game_module:
-    def __init__(self):
-        self.world_size = (10,10)
-        self.grid_size = (self.world_size[0]+2, self.world_size[1]+2)
+    def __init__(self, outfile_name, num_obs):
+        self.world_size = (10, 10)
+        self.grid_size = (self.world_size[0] + 2, self.world_size[1] + 2)
         self.scale = 50
-        self.pixel_dim = (self.grid_size[0]*self.scale, self.grid_size[1]*self.scale)
+        self.pixel_dim = (self.grid_size[0] * self.scale, self.grid_size[1] * self.scale)
 
-        self.num_obs = 15
+        # self.num_obs = 15
+        self.num_obs = num_obs
         self.timeout = 100
 
-        self.white = (255,255,255)
-        self.blue = (0,0,225)
-        self.green = (0,255,0)
-        self.black = (0,0,0)
+        self.white = (255, 255, 255)
+        self.blue = (0, 0, 225)
+        self.green = (0, 255, 0)
+        self.black = (0, 0, 0)
 
-        self.pos = [0,0]
-        self.goal_pos = [0,0]
+        self.pos = [0, 0]
+        self.goal_pos = [0, 0]
         self.obs = []
         self.obs_mat = np.zeros(self.world_size)
 
@@ -29,14 +30,11 @@ class game_module:
 
         self.hd_module = hd_module()
         self.num_cond = self.hd_module.num_cond
-        self.num_cond_state1 = self.hd_module.num_cond_state1
-        self.num_cond_state2 = self.hd_module.num_cond_state2
         self.num_thrown = self.hd_module.num_thrown
-        self.num_thrown_state1 = self.hd_module.num_thrown_state1
-        self.num_thrown_state2 = self.hd_module.num_thrown_state2
 
         self.outdir = './data/'
-        self.outfile = self.outdir + 'game_data_2state_based.out'
+        # self.outfile = self.outdir + 'game_data_random.out'
+        self.outfile = self.outdir + outfile_name
         if not os.path.exists(self.outdir):
             os.makedirs(self.outdir)
 
