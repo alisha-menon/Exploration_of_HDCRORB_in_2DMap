@@ -32,7 +32,9 @@ class hd_module:
         #set to 1 to use softmax, set to 0 to not
         self.activation_function = 1
         # set to 1 to activate the two state method 
-        self.two_states = 1
+        self.two_states = 0
+        # set to 1 to activate the stuck identification
+        self.stuck_id = 0
 
         self.output_vectors = []
         self.output_actuators = []
@@ -88,17 +90,25 @@ class hd_module:
         self.hd_program_vec = np.zeros((self.dim,), dtype = np.int)
         self.hd_program_vec_state1 = np.zeros((self.dim,), dtype = np.int)
         self.hd_program_vec_state2 = np.zeros((self.dim,), dtype = np.int)
+        self.hd_program_vec_goalx = np.zeros((self.dim,), dtype = np.int)
+        self.hd_program_vec_goaly = np.zeros((self.dim,), dtype = np.int)
 
         # Initialize condition vector
         self.hd_cond_vec = np.zeros((self.dim,), dtype = np.int)
         self.hd_cond_vec_state1 = np.zeros((self.dim,), dtype = np.int)
         self.hd_cond_vec_state2 = np.zeros((self.dim,), dtype = np.int)
+        self.hd_cond_vec_goalx = np.zeros((self.dim,), dtype = np.int)
+        self.hd_cond_vec_goaly = np.zeros((self.dim,), dtype = np.int)
         self.num_cond = 0
         self.num_cond_state1 = 0
         self.num_cond_state2 = 0
+        self.num_cond_goalx = 0
+        self.num_cond_goaly = 0
         self.num_thrown = 0
         self.num_thrown_state1 = 0
         self.num_thrown_state2 = 0
+        self.num_thrown_goalx = 0
+        self.num_thrown_goaly = 0
 
 
     def create_bipolar_mem(self, numitem, dim):
@@ -187,6 +197,7 @@ class hd_module:
             #print("goal oriented encoding\n")
             return self.encode_sensors_goal
         return lambda sensor_in, train: self.encode_sensors_directional(sensor_in, train, method)
+        # return lambda sensor_in, train: self.encode_sensors_x_direction(sensor_in, train, method)
 
         #method 1
     def encode_sensors(self, sensor_in, train):
@@ -345,6 +356,73 @@ class hd_module:
             ## method 3
             return self.hd_mul(self.hd_mul(xsensors,ysensors), self.hd_threshold(xdist_vec + ydist_vec + last_vec))
 
+    #Consider only x direction
+    def encode_sensors_x_direction(self, sensor_in, train, method):
+        # Encode sensory data into HD space
+        # Currently binds together all sensor inputs
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        # outputs:
+        #   - sensor_vec: bipolar HD vector
+        sensor_vec = np.empty((self.dim, 4), dtype=np.int8)  # bind
+        for i, sensor_val in enumerate(sensor_in[:4]):
+            permuted_vec = self.hd_sensor_vals[sensor_val, :]
+            for j in range(i):
+                # permute hd_sensor_val based on the corresponding sensor id
+                permuted_vec = self.hd_perm(permuted_vec)
+
+            binded_sensor = self.hd_mul(self.hd_sensor_ids[i, :], permuted_vec)
+            sensor_vec[:, i] = binded_sensor
+
+        xsensors = self.hd_mul(sensor_vec[:, 0], sensor_vec[:, 1])
+        ysensors = self.hd_mul(sensor_vec[:, 2], sensor_vec[:, 3])
+
+        if sensor_in[4] > 0:
+            xval = self.hd_sensor_dist[2]
+        elif sensor_in[4] < 0:
+            xval = self.hd_sensor_dist[0]
+        else:
+            xval = self.hd_sensor_dist[1]
+
+        xdist_vec = self.hd_mul(self.hd_sensor_ids[4, :], xval)
+        last_vec = self.hd_sensor_last[sensor_in[6], :]
+
+        return self.hd_mul(self.hd_mul(xsensors, ysensors), self.hd_threshold(xdist_vec + last_vec))
+
+    #Consider only y direction
+    def encode_sensors_y_direction(self, sensor_in, train, method):
+        # Encode sensory data into HD space
+        # Currently binds together all sensor inputs
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        # outputs:
+        #   - sensor_vec: bipolar HD vector
+        sensor_vec = np.empty((self.dim, 4), dtype=np.int8)  # bind
+        for i, sensor_val in enumerate(sensor_in[:4]):
+            permuted_vec = self.hd_sensor_vals[sensor_val, :]
+            for j in range(i):
+                # permute hd_sensor_val based on the corresponding sensor id
+                permuted_vec = self.hd_perm(permuted_vec)
+
+            binded_sensor = self.hd_mul(self.hd_sensor_ids[i, :], permuted_vec)
+            sensor_vec[:, i] = binded_sensor
+
+        xsensors = self.hd_mul(sensor_vec[:, 0], sensor_vec[:, 1])
+        ysensors = self.hd_mul(sensor_vec[:, 2], sensor_vec[:, 3])
+
+        if sensor_in[5] > 0:
+            yval = self.hd_sensor_dist[2]
+        elif sensor_in[5] < 0:
+            yval = self.hd_sensor_dist[0]
+        else:
+            yval = self.hd_sensor_dist[1]
+        yval = self.hd_perm(yval)
+
+        ydist_vec = self.hd_mul(self.hd_sensor_ids[5, :], yval)
+
+        last_vec = self.hd_sensor_last[sensor_in[6], :]
+
+        return self.hd_mul(self.hd_mul(xsensors, ysensors), self.hd_threshold(ydist_vec + last_vec))
 
 
 
@@ -423,6 +501,49 @@ class hd_module:
 
         return sample_vec
 
+    #Model that considers only movement in x
+    def train_sample_goalx(self, sensor_in, act_in):
+        # Multiply encoded sensor vector with actuator vector
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        #   - act_in: integer representing actuator action
+        # outputs:
+        #   - sample_vec: bipolar HD vector
+
+        sensor_vec = self.encode_sensors_x_direction(sensor_in,True,3)
+        if self.new_condition(sensor_vec, self.threshold_known, self.hd_cond_vec):
+            act_vec = self.hd_actuator_vals[act_in,:]
+            sample_vec = self.hd_mul(sensor_vec,act_vec)
+            self.hd_cond_vec_state1 += sensor_vec
+            self.num_cond_state1 += 1
+        else:
+            sample_vec = np.zeros((self.dim), dtype=np.int8)
+            self.num_thrown_state1 += 1
+
+        return sample_vec
+
+    #Model that considers only movement in y
+    def train_sample_goaly(self, sensor_in, act_in):
+        # Multiply encoded sensor vector with actuator vector
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        #   - act_in: integer representing actuator action
+        # outputs:
+        #   - sample_vec: bipolar HD vector
+
+        sensor_vec = self.encode_sensors_y_direction(sensor_in,True,3)
+        if self.new_condition(sensor_vec, self.threshold_known, self.hd_cond_vec):
+            act_vec = self.hd_actuator_vals[act_in,:]
+            sample_vec = self.hd_mul(sensor_vec,act_vec)
+            self.hd_cond_vec_state1 += sensor_vec
+            self.num_cond_state1 += 1
+        else:
+            sample_vec = np.zeros((self.dim), dtype=np.int8)
+            self.num_thrown_state1 += 1
+
+        return sample_vec
+
+
     def test_sample(self, sensor_in):
         # Determine actuator action given sensory data
         # inputs:
@@ -436,6 +557,47 @@ class hd_module:
         sensor_vec = self.encoding_method(sensor_in,False)
         #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
         unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec)
+        if self.activation_function:
+            act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param)
+        else:
+            act_out = self.search_actuator_vals(unbind_vec)
+
+        return act_out
+
+    def test_sample_xgoal(self, sensor_in):
+        # Determine actuator action given sensory data
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        # outputs:
+        #   - act_out: integer representing decided actuator action
+
+        #for method 1, use encode_sensors
+        #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
+        #print("testing!\n")
+        sensor_vec = self.encoding_method(sensor_in,False)
+        #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
+        unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec_goalx)
+        if self.activation_function:
+            act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param)
+        else:
+            act_out = self.search_actuator_vals(unbind_vec)
+
+        return act_out
+
+
+    def test_sample_ygoal(self, sensor_in):
+        # Determine actuator action given sensory data
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        # outputs:
+        #   - act_out: integer representing decided actuator action
+
+        #for method 1, use encode_sensors
+        #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
+        #print("testing!\n")
+        sensor_vec = self.encoding_method(sensor_in,False)
+        #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
+        unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec_goaly)
         if self.activation_function:
             act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param)
         else:
@@ -488,7 +650,7 @@ class hd_module:
         # inputs:
         #   -file_in: filename for the recorded moves
         # Currently, the hd_program_vec is not being thresholded
-        print("training!\n")
+        print("training with ", file_in ,"\n")
         game_data = np.loadtxt(file_in, dtype = np.int8, delimiter=',')
         sensor_vals = game_data[:,:-1]
         actuator_vals = game_data[:,-1]
@@ -525,10 +687,18 @@ class hd_module:
                     self.output_actuators.append(actuator_vals[sample])
                 self.hd_program_vec = self.hd_program_vec + sample_vec
 
+            if self.stuck_id:
+                for sample in range(n_samples):
+                    sample_vecx = self.train_sample_goalx(sensor_vals[sample, :], actuator_vals[sample])
+                    self.hd_program_vec_goalx = self.hd_program_vec_goalx + sample_vecx
+                    sample_vecy = self.train_sample_goaly(sensor_vals[sample, :], actuator_vals[sample])
+                    self.hd_program_vec_goaly = self.hd_program_vec_goaly + sample_vecy
+
+
         print("state1 moves\n",state1_count)
         print("state2 moves\n",state2_count)        
-        pickle_vectors = open('output_vectors.pckl', 'wb')
-        pickle_actuators = open('output_actuators.pckl', 'wb')
+        pickle_vectors = open('output_vectors_original.pckl', 'wb')
+        pickle_actuators = open('output_actuators_original.pckl', 'wb')
         pickle.dump(self.output_vectors, pickle_vectors)
         pickle.dump(self.output_actuators, pickle_actuators)
         pickle_vectors.close()

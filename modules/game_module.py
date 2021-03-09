@@ -201,8 +201,11 @@ class game_module:
             self.steps = 0
             buffer_x_delta=[1]*4
             buffer_y_delta=[1]*4
-            stuck_buffer=[0]*4
+            stuck_bufferx=[0]*4
+            stuck_buffery=[0]*4
             while not_crash:
+                x_stuck_alert = 0
+                y_stuck_alert = 0
                 self.game_step(gametype, screen)
                 pygame.display.update()
 
@@ -222,17 +225,25 @@ class game_module:
                 buffer_y_delta.pop(0)
                 buffer_x_delta.append(current_sensor[4])
                 buffer_y_delta.append(current_sensor[5])
-                stuck_buffer.pop(0)
+                stuck_bufferx.pop(0)
+                stuck_buffery.pop(0)
 
-                print('current sensor is ', current_sensor)
                 is_stuck=self.check_behaviour(buffer_x_delta,buffer_y_delta)
-                stuck_buffer.append(is_stuck)
-                print('\nThe stuck buffer is ', stuck_buffer)
 
-                if sum(stuck_buffer)==len(stuck_buffer):
+                stuck_bufferx.append(is_stuck[0])
+                stuck_buffery.append(is_stuck[1])
+
+                if sum(stuck_bufferx) == len(stuck_bufferx):
                     print("!!!!!!!!")
-                    print("STUCK ALERT")
+                    print("STUCK ALERT in X")
                     print("!!!!!!!!")
+                    x_stuck_alert = 1
+
+                if sum(stuck_buffery) == len(stuck_buffery):
+                    print("!!!!!!!!")
+                    print("STUCK ALERT in Y")
+                    print("!!!!!!!!")
+                    y_stuck_alert = 1
 
                 if self.hd_module.two_states: 
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
@@ -241,7 +252,17 @@ class game_module:
                     else:
                         act_out = self.hd_module.test_sample_state2(current_sensor)
                 else:
-                    act_out = self.hd_module.test_sample(current_sensor)
+                    if self.hd_module.stuck_id:
+                        if x_stuck_alert:
+                            print('Alert in x, using x goal model')
+                            act_out = self.hd_module.test_sample_xgoal(current_sensor)
+                        elif y_stuck_alert:
+                            print('Alert in y, using y goal model')
+                            act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                        else:
+                            act_out = self.hd_module.test_sample(current_sensor)
+                    else:
+                        act_out = self.hd_module.test_sample(current_sensor)
 
                 if act_out == 0:
                     self.pos[0] -= 1
@@ -299,15 +320,75 @@ class game_module:
             # self.setup_game(obs_id=[int(ev) for ev in env])
             # print('Initial position', self.pos)
             self.steps = 0
+            #Buffers that store the current and previous 3 actions
+            buffer_x_delta = [1] * 4
+            buffer_y_delta = [1] * 4
+            stuck_bufferx = [0] * 4
+            stuck_buffery = [0] * 4
             flag=0
             while not_crash:
+                x_stuck_alert = 0
+                y_stuck_alert = 0
                 if self.goal_pos == self.pos:
                     success += 1
                     break
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
-                act_out = self.hd_module.test_sample(current_sensor)
+
+                #Updating buffers... not very elegantly
+                buffer_x_delta.pop(0)
+                buffer_y_delta.pop(0)
+                buffer_x_delta.append(current_sensor[4])
+                buffer_y_delta.append(current_sensor[5])
+                stuck_bufferx.pop(0)
+                stuck_buffery.pop(0)
+
+                #Check if it's stuck in the x or y direction
+                is_stuck = self.check_behaviour(buffer_x_delta, buffer_y_delta)
+
+                stuck_bufferx.append(is_stuck[0])
+                stuck_buffery.append(is_stuck[1])
+
+                #If it has been stuck for x (e.g.) 4 iterations, turn on these flags
+                #I did it like this because 1) the buffer may take some iterations to populate
+                #and 2) Sometimes it gets stuck for a quick moment but it gets out of it on its
+                #own, we want to identify when it has the potential to time-out
+                if sum(stuck_bufferx) == len(stuck_bufferx):
+                    # print("!!!!!!!!")
+                    # print("STUCK ALERT in X")
+                    # print("!!!!!!!!")
+                    x_stuck_alert = 1
+
+                if sum(stuck_buffery) == len(stuck_buffery):
+                    # print("!!!!!!!!")
+                    # print("STUCK ALERT in Y")
+                    # print("!!!!!!!!")
+                    y_stuck_alert = 1
+
+
+
+                # act_out = self.hd_module.test_sample(current_sensor)
+                if self.hd_module.two_states:
+                    if (self.check_state(self.pos[0],self.pos[1]) == 1):
+                        act_out = self.hd_module.test_sample_state1(current_sensor)
+                    #elif (self.check_state(self.pos[0],self.pos[1])==2):
+                    else:
+                        act_out = self.hd_module.test_sample_state2(current_sensor)
+                else:
+                    #If stuck id is active and the flags are on, then go to one of the alternative models
+                    if self.hd_module.stuck_id:
+                        if x_stuck_alert:
+                            act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                        elif y_stuck_alert:
+                            act_out = self.hd_module.test_sample_xgoal(current_sensor)
+                        else:
+                            act_out = self.hd_module.test_sample(current_sensor)
+                    else:
+                        act_out = self.hd_module.test_sample(current_sensor)
+
+
+
                 if act_out == 0:
                     self.pos[0] -= 1
                 elif act_out == 1:
@@ -348,7 +429,6 @@ class game_module:
         return success,crash,stuck,step_count, crash_count, stuck_count
 
 
-
     def test_game(self, num_test):
         not_crash = True
 
@@ -357,19 +437,55 @@ class game_module:
         success = 0
         crash = 0
         stuck = 0
+        success_times=[]
         for i in range(num_test):
             not_crash = True
             self.setup_game()
             self.steps = 0
-            while not_crash:
+            buffer_x_delta=[1]*4
+            buffer_y_delta=[1]*4
+            stuck_bufferx=[0]*4
+            stuck_buffery=[0]*4
 
+
+            begin_time=time.time()
+
+            while not_crash:
+                x_stuck_alert = 0
+                y_stuck_alert = 0
                 if self.goal_pos == self.pos:
                     self.random_goal_location()
                     success += 1
+                    end_time=time.time()
+                    time_total=end_time-begin_time
+                    success_times.append(time_total)
                     break
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
+
+                buffer_x_delta.pop(0)
+                buffer_y_delta.pop(0)
+                buffer_x_delta.append(current_sensor[4])
+                buffer_y_delta.append(current_sensor[5])
+                stuck_bufferx.pop(0)
+                stuck_buffery.pop(0)
+
+                is_stuck=self.check_behaviour(buffer_x_delta,buffer_y_delta)
+                stuck_bufferx.append(is_stuck[0])
+                stuck_buffery.append(is_stuck[1])
+
+                if sum(stuck_bufferx)==len(stuck_bufferx):
+                    # print("!!!!!!!!")
+                    # print("STUCK ALERT in X")
+                    # print("!!!!!!!!")
+                    x_stuck_alert=1
+
+                if sum(stuck_buffery)==len(stuck_buffery):
+                    # print("!!!!!!!!")
+                    # print("STUCK ALERT in Y")
+                    # print("!!!!!!!!")
+                    y_stuck_alert=1
 
                 if self.hd_module.two_states: 
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
@@ -378,7 +494,16 @@ class game_module:
                     else:
                         act_out = self.hd_module.test_sample_state2(current_sensor)
                 else:
-                    act_out = self.hd_module.test_sample(current_sensor)
+                    if self.hd_module.stuck_id:
+                        if x_stuck_alert:
+                            act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                        elif y_stuck_alert:
+                            act_out = self.hd_module.test_sample_xgoal(current_sensor)
+                        else:
+                            act_out = self.hd_module.test_sample(current_sensor)
+                    else:
+                        act_out = self.hd_module.test_sample(current_sensor)
+
 
                 if act_out == 0:
                     self.pos[0] -= 1
@@ -403,7 +528,7 @@ class game_module:
         print("success: {} \t crash: {} \t stuck: {}".format(success, crash, stuck))
         print("success rate: {:.2f}".format(success/(success+crash+stuck)))
 
-        return success,crash,stuck
+        return success,crash,stuck,np.mean(success_times)
 
     def game_step(self, gametype, screen):
         screen.fill(self.white)
@@ -488,9 +613,8 @@ class game_module:
 
     #Checks if agent is "stuck" going back and forth in one direction while not progressing in the other
     def check_behaviour(self, buffer_delta_x, buffer_delta_y):
-        is_stuck = 0
-        print('delta x ', buffer_delta_x)
-        print('delta y ',buffer_delta_y)
+        stuck_x = 0
+        stuck_y = 0
         #The buffers record the last 3 and the current delta in direction
         #A sum equal to 0 means that the agent went back and forth over 4 time steps
         sum_buffer_x = sum(buffer_delta_x)
@@ -502,13 +626,12 @@ class game_module:
         if sum_buffer_x == 0 or len(unique_buffer_x)==2:
             # But made no progress in the y direction
             if len(unique_buffer_y) == 1:
-                is_stuck = 1
-                print('IT IS STUCK IN THE X DIRECTION!!!!!')
+                stuck_x = 1
         if sum_buffer_y == 0 or len(unique_buffer_y)==2 :
             if len(unique_buffer_x) == 1:
-                is_stuck = 1
-                print('IT IS STUCK IN THE Y DIRECTION!!!!!')
-        return is_stuck
+                stuck_y = 1
+        return stuck_x,stuck_y
+
 
     def random_goal_location(self):
         # Choose random unoccupied square for the goal position
