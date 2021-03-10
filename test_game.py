@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 train_file = './data/game_data_2state_based.out'
-#train_file = './data/game_dat_test4.out'
+# train_file = './data/game_dat_test.out'
 game_data = np.loadtxt(train_file, dtype = np.int8, delimiter=',')
 n_samples = game_data.shape[0]
 print (n_samples)
@@ -59,6 +59,8 @@ softmax_param_state2 = 10.12
 success=np.empty((len(thresholds),))
 crash=np.empty((len(thresholds),))
 stuck=np.empty((len(thresholds),))
+success_times=np.empty((len(thresholds),))
+
 num_cond_list = np.empty((len(thresholds),))
 num_thrown_list = np.empty((len(thresholds),))
 sum_success = 0
@@ -67,7 +69,7 @@ best_threshold = 0
 crashes = 0
 stucks = 0
 for i,threshold in enumerate(thresholds):
-    a = game_module()
+    a = game_module('./data/outfname.out',15)
     #a.set_sensor_weight(weight)
     a.set_threshold_known(threshold_nostate)
     a.set_threshold_known_state1(threshold_state1)
@@ -82,7 +84,7 @@ for i,threshold in enumerate(thresholds):
     num_cond_list[i] = a.num_cond
     print(num_thrown_list[i]/n_samples)
     print(num_cond_list[i]/n_samples)
-    success[i], crash[i], stuck[i] = a.test_game(trials)
+    success[i], crash[i], stuck[i], success_times[i] = a.test_game(trials)
     print(crash[i])
     print(stuck[i])
     sum_success += success[i]/trials
@@ -98,6 +100,7 @@ print("average crashes: ", crashes/len(thresholds))
 print("average stuck trials: ", stucks/len(thresholds))
 print("best_threshold: ",best_threshold)
 print("best_success: ",best_success)
+# print("success times: ",success_times/len(thresholds))
 plt.plot(thresholds,success/trials, label='Success')
 plt.plot(thresholds,crash/trials,label='Crash')
 plt.plot(thresholds,stuck/trials,label='Stuck')
