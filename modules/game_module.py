@@ -26,6 +26,7 @@ class game_module:
         self.obs_mat = np.zeros(self.world_size)
 
         self.steps = 0
+        self.average_steps = 0
 
         self.hd_module = hd_module()
         self.num_cond = self.hd_module.num_cond
@@ -246,6 +247,7 @@ class game_module:
         success = 0
         crash = 0
         stuck = 0
+        self.average_steps = 0
         for i in range(num_test):
             not_crash = True
             self.setup_game()
@@ -287,12 +289,13 @@ class game_module:
                     stuck += 1
 
                 self.steps += 1
+            self.average_steps += self.steps
 
-
+        self.average_steps = self.average_steps / num_test
         print("success: {} \t crash: {} \t stuck: {}".format(success, crash, stuck))
         print("success rate: {:.2f}".format(success/(success+crash+stuck)))
 
-        return success,crash,stuck
+        return success,crash,stuck,self.average_steps
 
     def game_step(self, gametype, screen):
         screen.fill(self.white)

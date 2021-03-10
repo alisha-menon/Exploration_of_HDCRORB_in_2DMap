@@ -22,7 +22,7 @@ thresholds = np.linspace(0,1,101)
 threshold_nostate = 0.05
 threshold_state1 = 0.16
 threshold_state2 = 0.04
-softmax_param = 10.12
+softmax_param = 7.79
 softmax_param_state1 = 10.12
 softmax_param_state2 = 10.12
 #print(thresholds)
@@ -59,6 +59,7 @@ softmax_param_state2 = 10.12
 success=np.empty((len(thresholds),))
 crash=np.empty((len(thresholds),))
 stuck=np.empty((len(thresholds),))
+steps = np.empty((len(thresholds),))
 num_cond_list = np.empty((len(thresholds),))
 num_thrown_list = np.empty((len(thresholds),))
 sum_success = 0
@@ -66,6 +67,7 @@ best_success = 0
 best_threshold = 0
 crashes = 0
 stucks = 0
+average_steps = 0
 for i,threshold in enumerate(thresholds):
     a = game_module()
     #a.set_sensor_weight(weight)
@@ -76,26 +78,28 @@ for i,threshold in enumerate(thresholds):
     a.set_softmax_param_state1(softmax_param_state1)
     a.set_softmax_param_state2(softmax_param_state2)
     #print(i)
-    print(threshold)
+    print(threshold,"\n")
     a.train_from_file(train_file)
     num_thrown_list[i] = a.num_thrown
     num_cond_list[i] = a.num_cond
-    print(num_thrown_list[i]/n_samples)
-    print(num_cond_list[i]/n_samples)
-    success[i], crash[i], stuck[i] = a.test_game(trials)
-    print(crash[i])
-    print(stuck[i])
+    #steps[i] = a.average_steps
+    #print(num_thrown_list[i]/n_samples)
+    #print(num_cond_list[i]/n_samples)
+    success[i], crash[i], stuck[i],steps[i] = a.test_game(trials)
+    #print(crash[i])
+    #print(stuck[i])
     sum_success += success[i]/trials
     if success[i]/trials > best_success:
         best_success = success[i]/trials
         best_threshold = threshold
     crashes += crash[i]
     stucks += stuck[i]
+    average_steps += steps[i]
 print('done with tests')
-
 print("average success rate: ", sum_success/len(thresholds))
 print("average crashes: ", crashes/len(thresholds))
 print("average stuck trials: ", stucks/len(thresholds))
+print("average steps per trials:",average_steps/len(thresholds))
 print("best_threshold: ",best_threshold)
 print("best_success: ",best_success)
 plt.plot(thresholds,success/trials, label='Success')

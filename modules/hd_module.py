@@ -32,7 +32,7 @@ class hd_module:
         #set to 1 to use softmax, set to 0 to not
         self.activation_function = 1
         # set to 1 to activate the two state method 
-        self.two_states = 1
+        self.two_states = 0
 
         self.output_vectors = []
         self.output_actuators = []
@@ -507,14 +507,15 @@ class hd_module:
             for sample in range(n_samples):
                 # figure out which state we are in, and train into the correct program vector and condition vector list accordingly
                 state = sensor_vals[sample,7]
+                #state2_count += 1
+                #sample_vec = self.train_sample_state2(sensor_vals[sample,:],actuator_vals[sample])
+                #self.hd_program_vec_state2 = self.hd_program_vec_state2 + sample_vec  
                 if state == 1:
                     state1_count += 1
-                    #print("state1 sample trained!\n")
                     sample_vec = self.train_sample_state1(sensor_vals[sample,:],actuator_vals[sample])
                     self.hd_program_vec_state1 = self.hd_program_vec_state1 + sample_vec
                 else:
                     state2_count += 1
-                    #print("state2 sample trained!\n")
                     sample_vec = self.train_sample_state2(sensor_vals[sample,:],actuator_vals[sample])
                     self.hd_program_vec_state2 = self.hd_program_vec_state2 + sample_vec                    
         else:
