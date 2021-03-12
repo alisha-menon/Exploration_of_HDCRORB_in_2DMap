@@ -64,7 +64,8 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file,
                 os.makedirs('inspect_figs')
             gm = game_module('game_data_test_random.out', obstacles)
             for sen,stuck_env in enumerate(stuck_envs):
-                gm.game_inspect_env('1',[int(num) for num in test_ids[stuck_env]], [int(num) for num in goal_ids[stuck_env]], filename='./inspect_figs/obs_' + str(obstacles) + '_sn_'+ str(sen) + ".jpg")
+                if not os.path.exists('./inspect_figs/obs_env_' + str(obstacles) + '_sn_'+ str(stuck_env) + ".jpg"):
+                    gm.game_inspect_env('1',[int(num) for num in test_ids[stuck_env]], [int(num) for num in goal_ids[stuck_env]], filename='./inspect_figs/obs_env_' + str(obstacles) + '_sn_'+ str(stuck_env) + ".jpg")
 
             # print('Time out ', sum([ot[2] for ot in out[-1]]) )
             # print('Stuck ', sum([ot[3] for ot in out[-1]]) )
