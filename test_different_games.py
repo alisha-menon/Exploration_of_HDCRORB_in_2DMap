@@ -44,6 +44,7 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file)
         stucks[i]=float(out[2]/len(out[3]))
         mean_steps_success[i]=np.mean(np.array([num for inum,num in enumerate(out[3]) if out[4][inum]<1]))
 
+
     return successes,crashes,stucks,mean_steps_success
 
 

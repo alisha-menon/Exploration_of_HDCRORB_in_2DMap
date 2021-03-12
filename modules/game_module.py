@@ -312,6 +312,17 @@ class game_module:
         stuck_count=[]
         crash_count=[0]*100
         stuck_count=[0]*100
+
+        diagnose=[[None]*6]*100
+        #Diagnose
+        #0: reached goal
+        #1: crash
+        #2: time-out
+        #3: stuck
+        #were these stuck flags equal to 1 upon exit from the while loop?
+           #4: x_stuck_alert
+           #5: y_stuck_alert
+
         i=0
         start=time.time()
         for env,goal in zip(test_reader,goal_reader):
@@ -332,6 +343,7 @@ class game_module:
                 y_stuck_alert = 0
                 if self.goal_pos == self.pos:
                     success += 1
+                    diagnose[i][0] = 1
                     break
 
                 current_sensor = self.get_sensor()
@@ -406,12 +418,15 @@ class game_module:
                     # print('CRASH!')
                     flag=1
                     crash_count[i]=1
+                    diagnose[i][1] = 1
                 elif (self.steps >= self.timeout):
                     not_crash = False
                     stuck += 1
                     # print('STUCK!')
                     flag=1
                     stuck_count[i]=1
+                    diagnose[i][2] = 1
+                    diagnose[i][3] = 1
 
                 self.steps += 1
             i+=1
@@ -421,13 +436,18 @@ class game_module:
             elif flag==0:
                 step_count.append(self.steps)
 
+            if x_stuck_alert==1:
+                diagnose[i][4]=1
+            if y_stuck_alert==1:
+                diagnose[i][5]=1
+
         end=time.time()
 
 
         print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {}".format(success, crash, stuck,end-start,np.mean(np.array(step_count))))
         print("success rate: {:.2f}".format(success/(success+crash+stuck)))
         print('step count ', len(step_count), len(crash_count),len(stuck_count))
-        return success,crash,stuck,step_count, crash_count, stuck_count
+        return success,crash,stuck,step_count, crash_count, stuck_count, diagnose
 
 
     def test_game(self, num_test):
@@ -438,11 +458,10 @@ class game_module:
         success = 0
         crash = 0
         stuck = 0
-<<<<<<< HEAD
+
         self.average_steps = 0
-=======
         success_times=[]
->>>>>>> 49cbbe9b173ba51562385465d3dc663d5233a978
+
         for i in range(num_test):
             not_crash = True
             self.setup_game()
@@ -451,7 +470,6 @@ class game_module:
             buffer_y_delta=[1]*4
             stuck_bufferx=[0]*4
             stuck_buffery=[0]*4
-
 
             begin_time=time.time()
 
@@ -464,6 +482,7 @@ class game_module:
                     end_time=time.time()
                     time_total=end_time-begin_time
                     success_times.append(time_total)
+
                     break
 
                 current_sensor = self.get_sensor()
@@ -528,6 +547,7 @@ class game_module:
                     stuck += 1
 
                 self.steps += 1
+
             self.average_steps += self.steps
 
         self.average_steps = self.average_steps / num_test

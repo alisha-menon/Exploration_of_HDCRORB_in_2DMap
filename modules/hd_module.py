@@ -33,11 +33,9 @@ class hd_module:
         self.activation_function = 1
         # set to 1 to activate the two state method 
         self.two_states = 0
-<<<<<<< HEAD
-=======
+
         # set to 1 to activate the stuck identification
         self.stuck_id = 0
->>>>>>> 49cbbe9b173ba51562385465d3dc663d5233a978
 
         self.output_vectors = []
         self.output_actuators = []
