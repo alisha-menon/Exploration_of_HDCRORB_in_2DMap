@@ -2,6 +2,8 @@ from modules.game_module import game_module
 import numpy as np
 import random
 import csv
+import pygame
+import os
 
 
 def generate_dataset(obstacle_dataset_file,goal_dataset_file,obstacles,trials):
@@ -26,7 +28,7 @@ def generate_dataset(obstacle_dataset_file,goal_dataset_file,obstacles,trials):
         a.random_goal_location()
         csv_writer_goal.writerow(a.goal_pos)
 
-def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file):
+def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file, inspect_envs):
 
     successes=[0]*test_num
     crashes=[0]*test_num
@@ -34,7 +36,7 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file)
     mean_steps_success=[0]*test_num
 
     for i in range(test_num):
-
+        print('Trial number ', i)
         a = game_module('./data/tests.out',obstacles)
         a.train_from_file(train_file)
         out=a.play_game_from_file(obstacle_dataset_file,goal_dataset_file)
@@ -44,6 +46,30 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file)
         stucks[i]=float(out[2]/len(out[3]))
         mean_steps_success[i]=np.mean(np.array([num for inum,num in enumerate(out[3]) if out[4][inum]<1]))
 
+        if inspect_envs:
+            #Environments that threw a timeout (stuck)
+            stuck_envs=[]
+            for i, ot in enumerate(out[-1]):
+                if ot[2]==1:
+                    stuck_envs.append(i)
+
+            #Read trainig environments from file
+            test_reader = csv.reader(open(obstacle_dataset_file, 'r'))
+            goal_reader = csv.reader(open(goal_dataset_file, 'r'))
+            test_ids=list(test_reader)
+            goal_ids=list(goal_reader)
+
+            #Save prints of the enironments that
+            if not os.path.exists('./inspect_figs'):
+                os.makedirs('inspect_figs')
+            gm = game_module('game_data_test_random.out', obstacles)
+            for sen,stuck_env in enumerate(stuck_envs):
+                gm.game_inspect_env('1',[int(num) for num in test_ids[stuck_env]], [int(num) for num in goal_ids[stuck_env]], filename='./inspect_figs/obs_' + str(obstacles) + '_sn_'+ str(sen) + ".jpg")
+
+            # print('Time out ', sum([ot[2] for ot in out[-1]]) )
+            # print('Stuck ', sum([ot[3] for ot in out[-1]]) )
+            # print('xStuck ', sum([ot[4] for ot in out[-1]]) )
+            # print('yStuck ', sum([ot[5] for ot in out[-1]]) )
 
     return successes,crashes,stucks,mean_steps_success
 
@@ -89,7 +115,9 @@ for on,obstacles in enumerate(obstacle_list):
             #For these experiments I'm just using the datasets generated for the two state case
             train_file='./data/game_data_2state_based.out'
             test_num=10
-            successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file)
+            inspect_test_environments=1
+
+            successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file, inspect_test_environments)
             mean_successes=np.mean(np.array(successes))
             mean_crashes=np.mean(np.array(crashes))
             mean_stucks=np.mean(np.array(stucks))

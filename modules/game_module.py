@@ -189,6 +189,20 @@ class game_module:
         self.hd_module.softmax_param_state2 = softmax_param
         return
 
+    def game_inspect_env(self, gametype, obsid, goalid,filename=None):
+        pygame.init()
+        screen = pygame.display.set_mode(self.pixel_dim)
+        clock = pygame.time.Clock()
+        self.setup_game(obs_id=obsid, goal_id=goalid)
+        self.game_step(gametype, screen)
+        if filename:
+            print(filename)
+            pygame.image.save(screen, filename)
+        pygame.display.update()
+        clock.tick(2)
+        for i in range(100):
+            j=1
+
     def autoplay_game(self, gametype):
         pygame.init()
         screen = pygame.display.set_mode(self.pixel_dim)
@@ -309,11 +323,12 @@ class game_module:
         crash = 0
         stuck = 0
         step_count=[]
-        stuck_count=[]
         crash_count=[0]*100
         stuck_count=[0]*100
 
-        diagnose=[[None]*6]*100
+        diagnose=[[]]*100
+        # for x in diagnose[0]: x = 0
+
         #Diagnose
         #0: reached goal
         #1: crash
@@ -323,10 +338,10 @@ class game_module:
            #4: x_stuck_alert
            #5: y_stuck_alert
 
-        i=0
+        # i=0
         start=time.time()
-        for env,goal in zip(test_reader,goal_reader):
-            # print('\nNEW ENV')
+        for env,goal,i in zip(test_reader,goal_reader,range(100)):
+            diagnose[i]=[0,0,0,0,0,0]
             not_crash = True
             self.setup_game(obs_id=[int(ev) for ev in env],goal_id=[int(go) for go in goal])
             # self.setup_game(obs_id=[int(ev) for ev in env])
@@ -337,13 +352,15 @@ class game_module:
             buffer_y_delta = [1] * 4
             stuck_bufferx = [0] * 4
             stuck_buffery = [0] * 4
-            flag=0
+            flag_goal=0
+            flag_crash=0
+            flag_timeout=0
             while not_crash:
                 x_stuck_alert = 0
                 y_stuck_alert = 0
                 if self.goal_pos == self.pos:
                     success += 1
-                    diagnose[i][0] = 1
+                    flag_goal=1
                     break
 
                 current_sensor = self.get_sensor()
@@ -416,30 +433,43 @@ class game_module:
                     not_crash = False
                     crash += 1
                     # print('CRASH!')
-                    flag=1
                     crash_count[i]=1
-                    diagnose[i][1] = 1
+                    flag_crash=1
                 elif (self.steps >= self.timeout):
                     not_crash = False
                     stuck += 1
                     # print('STUCK!')
-                    flag=1
                     stuck_count[i]=1
-                    diagnose[i][2] = 1
-                    diagnose[i][3] = 1
+                    flag_timeout=1
 
                 self.steps += 1
-            i+=1
+            # i+=1
             # print('It took ', self.steps, ' steps')
-            if flag==1:
+            if flag_crash or flag_timeout==1:
                 step_count.append(self.timeout)
-            elif flag==0:
+            elif flag_goal==1:
                 step_count.append(self.steps)
+
+            # 0: reached goal
+            # 1: crash
+            # 2: time-out
+            # 3: stuck
+            # were these stuck flags equal to 1 upon exit from the while loop?
+            # 4: x_stuck_alert
+            # 5: y_stuck_alert
+            if flag_goal:
+                diagnose[i][0]=1
+            if flag_crash:
+                diagnose[i][1]=1
+            if flag_timeout:
+                diagnose[i][2]=1
+                diagnose[i][3]=1
 
             if x_stuck_alert==1:
                 diagnose[i][4]=1
             if y_stuck_alert==1:
                 diagnose[i][5]=1
+
 
         end=time.time()
 
