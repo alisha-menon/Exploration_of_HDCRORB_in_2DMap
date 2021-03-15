@@ -12,13 +12,22 @@ class hd_module:
         self.num_sensors = 7
         self.num_actuators = 4
         self.sensor_weight = 1
-        self.threshold_known = 0.08
-        self.threshold_known_state1 = 0.07
-        self.threshold_known_state2 = 0.09
-        self.softmax_param = 7.79
-        self.softmax_param_state1 = 7.79
-        self.softmax_param_state2 = 7.79
 
+        self.threshold_known = 0.05
+
+        self.threshold_known_state1 = 0.16
+        self.threshold_known_state2 = 0.04
+
+        self.threshold_known_only_x = 0.16
+        self.threshold_known_only_y = 0.04
+
+        self.softmax_param = 7.79
+
+        self.softmax_param_state1 = 10.12
+        self.softmax_param_state2 = 10.12
+
+        self.softmax_param_only_x = 10.12
+        self.softmax_param_only_y = 10.12
         # method 1(0), 2(1), 3(2)
         # want to modify so that given global information prioritize obstacle avoidance, or goal. Specifically see issue where the direction of goal is through an
         # obstacle, and going around the obstacle means going away from the goal temporarily. The agent is not able to make that choice to go away from goal
@@ -33,11 +42,9 @@ class hd_module:
         self.activation_function = 1
         # set to 1 to activate the two state method 
         self.two_states = 0
-<<<<<<< HEAD
-=======
         # set to 1 to activate the stuck identification
         self.stuck_id = 0
->>>>>>> 49cbbe9b173ba51562385465d3dc663d5233a978
+        self.stuck_state_machine = 1
 
         self.output_vectors = []
         self.output_actuators = []
@@ -89,12 +96,18 @@ class hd_module:
             self.hd_actuator_vals = self.create_bipolar_mem(self.num_actuators,self.dim)
             np.save(actuator_vals_fname, self.hd_actuator_vals)
 
+
+        self.hd_x_act_vals = self.hd_actuator_vals[0:2,:] #first two
+        self.hd_y_act_vals = self.hd_actuator_vals[2:,:]
+
         # Initialize program vector
         self.hd_program_vec = np.zeros((self.dim,), dtype = np.int)
         self.hd_program_vec_state1 = np.zeros((self.dim,), dtype = np.int)
         self.hd_program_vec_state2 = np.zeros((self.dim,), dtype = np.int)
         self.hd_program_vec_goalx = np.zeros((self.dim,), dtype = np.int)
         self.hd_program_vec_goaly = np.zeros((self.dim,), dtype = np.int)
+        self.hd_program_vec_only_x = np.zeros((self.dim,), dtype = np.int)
+        self.hd_program_vec_only_y = np.zeros((self.dim,), dtype = np.int)
 
         # Initialize condition vector
         self.hd_cond_vec = np.zeros((self.dim,), dtype = np.int)
@@ -102,17 +115,24 @@ class hd_module:
         self.hd_cond_vec_state2 = np.zeros((self.dim,), dtype = np.int)
         self.hd_cond_vec_goalx = np.zeros((self.dim,), dtype = np.int)
         self.hd_cond_vec_goaly = np.zeros((self.dim,), dtype = np.int)
+        self.hd_cond_vec_only_x = np.zeros((self.dim,), dtype = np.int)
+        self.hd_cond_vec_only_y = np.zeros((self.dim,), dtype = np.int)  
+
         self.num_cond = 0
         self.num_cond_state1 = 0
         self.num_cond_state2 = 0
         self.num_cond_goalx = 0
         self.num_cond_goaly = 0
+        self.num_cond_only_x = 0
+        self.num_cond_only_y = 0
+
         self.num_thrown = 0
         self.num_thrown_state1 = 0
         self.num_thrown_state2 = 0
         self.num_thrown_goalx = 0
         self.num_thrown_goaly = 0
-
+        self.num_thrown_only_x = 0
+        self.num_thrown_only_y = 0
 
     def create_bipolar_mem(self, numitem, dim):
         # Creates random bipolar memory of given size
@@ -178,6 +198,25 @@ class hd_module:
         # outputs:
         #   - i: integer index of closest item in 'hd_actuator_vals'
         dists = np.matmul(self.hd_actuator_vals, A, dtype = np.int)
+        return np.argmax(dists)
+
+
+    def search_x_actuator_vals(self, A):
+        # Find the nearest item in 'hd_actuator_vals' according to Hamming distance
+        # inputs:
+        #   - A: bipolar HD vector
+        # outputs:
+        #   - i: integer index of closest item in 'hd_actuator_vals'
+        dists = np.matmul(self.hd_x_act_vals, A, dtype = np.int)
+        return np.argmax(dists)
+
+    def search_y_actuator_vals(self, A):
+        # Find the nearest item in 'hd_actuator_vals' according to Hamming distance
+        # inputs:
+        #   - A: bipolar HD vector
+        # outputs:
+        #   - i: integer index of closest item in 'hd_actuator_vals'
+        dists = np.matmul(self.hd_y_act_vals, A, dtype = np.int)
         return np.argmax(dists)
 
     def softmax_actuator_vals(self, A, softmax_param):
@@ -428,7 +467,6 @@ class hd_module:
         return self.hd_mul(self.hd_mul(xsensors, ysensors), self.hd_threshold(ydist_vec + last_vec))
 
 
-
     def new_condition(self, condition_vec, threshold, cond_vec_input):
         dist = np.matmul(condition_vec, self.hd_threshold(cond_vec_input), dtype = np.int)
         pct = dist/self.dim
@@ -546,6 +584,49 @@ class hd_module:
 
         return sample_vec
 
+    def train_sample_only_x(self, sensor_in, act_in):
+        # Multiply encoded sensor vector with actuator vector
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        #   - act_in: integer representing actuator action
+        # outputs:
+        #   - sample_vec: bipolar HD vector
+
+        sensor_vec = self.encoding_method(sensor_in,True)
+        if self.new_condition(sensor_vec, self.threshold_known_only_x, self.hd_cond_vec_only_x):
+            act_vec = self.hd_x_act_vals[act_in,:]
+            #print(act_vec)
+            sample_vec = self.hd_mul(sensor_vec,act_vec)
+            self.hd_cond_vec_only_x += sensor_vec
+            self.num_cond_only_x += 1
+        else:
+            sample_vec = np.zeros((self.dim), dtype=np.int8)
+            self.num_thrown_only_x += 1
+
+        return sample_vec
+
+    #Model that considers only movement in y
+    def train_sample_only_y(self, sensor_in, act_in):
+        # Multiply encoded sensor vector with actuator vector
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        #   - act_in: integer representing actuator action
+        # outputs:
+        #   - sample_vec: bipolar HD vector
+
+        sensor_vec = self.encoding_method(sensor_in,True)
+        if self.new_condition(sensor_vec, self.threshold_known_only_y, self.hd_cond_vec_only_y):
+            act_in = act_in - 2 #move index down to the two y vector possibilities
+            act_vec = self.hd_y_act_vals[act_in,:]
+            #print(act_vec)
+            sample_vec = self.hd_mul(sensor_vec,act_vec)
+            self.hd_cond_vec_only_y += sensor_vec
+            self.num_cond_only_y += 1
+        else:
+            sample_vec = np.zeros((self.dim), dtype=np.int8)
+            self.num_thrown_only_y += 1
+
+        return sample_vec
 
     def test_sample(self, sensor_in):
         # Determine actuator action given sensory data
@@ -648,6 +729,46 @@ class hd_module:
 
         return act_out
 
+    def test_sample_only_x(self, sensor_in):
+        # Determine actuator action given sensory data
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        # outputs:
+        #   - act_out: integer representing decided actuator action
+
+        #for method 1, use encode_sensors
+        #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
+        #print("testing!\n")
+        sensor_vec = self.encoding_method(sensor_in,True)
+        #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
+        unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec_only_x)
+        #if self.activation_function:
+        #    act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param_state1)
+        #else:
+        act_out = self.search_x_actuator_vals(unbind_vec)
+
+        return act_out
+
+    def test_sample_only_y(self, sensor_in):
+        # Determine actuator action given sensory data
+        # inputs:
+        #   - sensor_in: array of binary flags (length 4)
+        # outputs:
+        #   - act_out: integer representing decided actuator action
+
+        #for method 1, use encode_sensors
+        #for method 2 and 3, use encoder_sensors_directional and change the last line of that function depending on the method
+        #print("testing!\n")
+        sensor_vec = self.encoding_method(sensor_in,True)
+        #unbind_vec = self.hd_mul(sensor_vec,self.hd_threshold(self.hd_program_vec))
+        unbind_vec = self.hd_mul(sensor_vec,self.hd_program_vec_only_y)
+        #if self.activation_function:
+        #    act_out = self.softmax_actuator_vals(unbind_vec, self.softmax_param_state2)
+        #else:
+        act_out = self.search_y_actuator_vals(unbind_vec) + 2
+
+        return act_out
+
     def train_from_file(self, file_in):
         # Build the program HV from a text file of recorded moves
         # inputs:
@@ -660,6 +781,8 @@ class hd_module:
         n_samples = game_data.shape[0]
         state1_count = 0
         state2_count = 0
+        only_x_count = 0
+        only_y_count = 0
 #        program_vec_b4thresh = np.zeros((self.dim,),dtype=np.int8)
 #        for sample in range(n_samples):
 #            sample_vec = self.train_sample(sensor_vals[sample,:],actuator_vals[sample])
@@ -683,12 +806,12 @@ class hd_module:
                     state2_count += 1
                     sample_vec = self.train_sample_state2(sensor_vals[sample,:],actuator_vals[sample])
                     self.hd_program_vec_state2 = self.hd_program_vec_state2 + sample_vec                    
-        else:
+        elif self.stuck_id:
             for sample in range(n_samples):
                 sample_vec = self.train_sample(sensor_vals[sample,:],actuator_vals[sample])
-                if any(sample_vec):
-                    self.output_vectors.append(sample_vec)
-                    self.output_actuators.append(actuator_vals[sample])
+                #if any(sample_vec):
+                #    self.output_vectors.append(sample_vec)
+                #   self.output_actuators.append(actuator_vals[sample])
                 self.hd_program_vec = self.hd_program_vec + sample_vec
 
             if self.stuck_id:
@@ -697,16 +820,32 @@ class hd_module:
                     self.hd_program_vec_goalx = self.hd_program_vec_goalx + sample_vecx
                     sample_vecy = self.train_sample_goaly(sensor_vals[sample, :], actuator_vals[sample])
                     self.hd_program_vec_goaly = self.hd_program_vec_goaly + sample_vecy
-
+        elif self.stuck_state_machine:
+            for sample in range(n_samples):
+                sample_vec = self.train_sample(sensor_vals[sample,:],actuator_vals[sample])
+                self.hd_program_vec = self.hd_program_vec + sample_vec
+                # if actuation is in the x direction then add to only_x program vector
+                if (actuator_vals[sample] == 0) or (actuator_vals[sample] == 1):
+                    sample_vecx = self.train_sample_only_x(sensor_vals[sample, :], actuator_vals[sample])
+                    self.hd_program_vec_only_x = self.hd_program_vec_only_x + sample_vecx
+                    only_x_count += 1
+                else: #actuation is in the y direction, add to only_y program vector
+                    sample_vecy = self.train_sample_only_y(sensor_vals[sample, :], actuator_vals[sample])
+                    self.hd_program_vec_only_y = self.hd_program_vec_only_y + sample_vecy
+                    only_y_count += 1            
+        else:
+            for sample in range(n_samples):
+                sample_vec = self.train_sample(sensor_vals[sample,:],actuator_vals[sample])
+                self.hd_program_vec = self.hd_program_vec + sample_vec
 
         print("state1 moves\n",state1_count)
         print("state2 moves\n",state2_count)        
-        pickle_vectors = open('output_vectors_original.pckl', 'wb')
-        pickle_actuators = open('output_actuators_original.pckl', 'wb')
-        pickle.dump(self.output_vectors, pickle_vectors)
-        pickle.dump(self.output_actuators, pickle_actuators)
-        pickle_vectors.close()
-        pickle_actuators.close()
+        #pickle_vectors = open('output_vectors_original.pckl', 'wb')
+        #pickle_actuators = open('output_actuators_original.pckl', 'wb')
+        #pickle.dump(self.output_vectors, pickle_vectors)
+        #pickle.dump(self.output_actuators, pickle_actuators)
+        #pickle_vectors.close()
+        #pickle_actuators.close()
 
         return
 

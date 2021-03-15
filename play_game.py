@@ -1,6 +1,6 @@
 from modules.game_module import game_module
 
-train_file = './data/game_data_2state_based_original.out'
+train_file = './data/game_data_2state_based.out'
 # train_file='./data/game_data_random_goal.out'
 
 live = int(input("Enter 1 to play the game live, 0 to autoplay using recall\n"))

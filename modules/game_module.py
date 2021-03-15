@@ -175,7 +175,15 @@ class game_module:
 
     def set_threshold_known_state2(self,threshold_known):
         self.hd_module.threshold_known_state2 = threshold_known
-        return                
+        return     
+
+    def set_threshold_known_only_x(self,threshold_known):
+        self.hd_module.threshold_known_only_x = threshold_known
+        return
+
+    def set_threshold_known_only_y(self,threshold_known):
+        self.hd_module.threshold_known_only_y = threshold_known
+        return 
 
     def set_softmax_param(self,softmax_param):
         self.hd_module.softmax_param = softmax_param
@@ -197,6 +205,8 @@ class game_module:
         not_crash = True
 
         last_act = 0
+        state = 1
+        switch_goal = 5
         while running:
             self.setup_game()
             self.steps = 0
@@ -245,25 +255,163 @@ class game_module:
                     print("STUCK ALERT in Y")
                     print("!!!!!!!!")
                     y_stuck_alert = 1
-
+                print(self.pos[0],self.pos[1])
                 if self.hd_module.two_states: 
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
                         act_out = self.hd_module.test_sample_state1(current_sensor)
                     #elif (self.check_state(self.pos[0],self.pos[1])==2):
                     else:
                         act_out = self.hd_module.test_sample_state2(current_sensor)
-                else:
-                    if self.hd_module.stuck_id:
-                        if x_stuck_alert:
-                            print('Alert in x, using x goal model')
-                            act_out = self.hd_module.test_sample_xgoal(current_sensor)
-                        elif y_stuck_alert:
-                            print('Alert in y, using y goal model')
-                            act_out = self.hd_module.test_sample_ygoal(current_sensor)
-                        else:
-                            act_out = self.hd_module.test_sample(current_sensor)
+                elif self.hd_module.stuck_id:
+                    if x_stuck_alert:
+                        act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                    elif y_stuck_alert:
+                        act_out = self.hd_module.test_sample_xgoal(current_sensor)
                     else:
                         act_out = self.hd_module.test_sample(current_sensor)
+                elif self.hd_module.stuck_state_machine:
+                    # decide state for the next move based on current sensor information and state
+                    xpos = self.pos[0]
+                    ypos = self.pos[1]
+                    obs_to_goalx = 0
+                    obs_to_goaly = 0
+                    right_xpos = xpos+1
+                    right_ypos = ypos
+                    left_xpos = xpos-1
+                    left_ypos = ypos
+                    up_xpos = xpos
+                    down_xpos = xpos
+                    up_ypos = ypos-1 #for some reason up means decrement
+                    down_ypos = ypos + 1
+                    delta_x = self.goal_pos[0] - self.pos[0] # if >0 then goal is to right, else left
+                    delta_y = self.goal_pos[1] - self.pos[1] # if >0 then goal is down, else up
+
+                    #check if there is an obstacle in the way to the goal for both the y and x directions
+                    if delta_x > 0:
+                        obs_to_goalx = self.check_collision(right_xpos, right_ypos)
+                    else:
+                        obs_to_goalx = self.check_collision(left_xpos,left_ypos)
+                    if delta_y > 0:
+                        obs_to_goaly = self.check_collision(down_xpos, down_ypos)
+                    else:
+                        obs_to_goalt = self.check_collision(up_xpos, up_ypos)
+
+                    if state == 1:
+                        if x_stuck_alert:
+                            avoidance_steps = 1
+                            switch_goal = 5
+                            if self.check_collision(right_xpos, right_ypos):
+                                state = 2 # go left
+                            else:
+                                state = 3 # go right
+                        elif y_stuck_alert:
+                            avoidance_steps = 1
+                            switch_goal = 5
+                            if self.check_collision(up_xpos,up_ypos):
+                                state = 5 # go down
+                            else:
+                                state = 4 # go up
+                        else:
+                            state = 1 # keep using main method
+                    elif state == 2:
+                        if obs_to_goaly: # if still an obstacle in the way of the y goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(left_xpos,left_ypos):
+                                state = 3 # switch and go right
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 2 # keep going left
+                                avoidance_steps += 1
+                        else:
+                            state = 6 # only y direction recall
+                    elif state == 3:
+                        if obs_to_goaly: # if still an obstacle in the way of the y goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(right_xpos,right_ypos):
+                                state = 2 # switch and go right
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 3 # keep going left
+                                avoidance_steps += 1
+                        else:
+                            state = 6 # only y direction recall
+                    elif state == 4:
+                        if obs_to_goalx: # if still an obstacle in the way of the x goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(up_xpos,up_ypos):
+                                state = 5 # switch and go down
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going up
+                            else:
+                                state = 4 # keep going up
+                                avoidance_steps += 1
+                        else:
+                            state = 7 # only x direction recall
+                    elif state == 5:
+                        if obs_to_goalx: # if still an obstacle in the way of the x goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(down_xpos,down_ypos):
+                                state = 4 # switch and go up
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 5 # keep going down
+                                avoidance_steps += 1
+                        else:
+                            state = 7 # only x direction recall
+                    elif state == 6:
+                        #if hit an obstacle or reached goal in y coordinate, switch back to main mode
+                        if self.check_collision(down_xpos,down_ypos) or self.check_collision(up_xpos,up_ypos):
+                            state = 1
+                        else:
+                            state = 6
+                    elif state == 7:
+                        #if hit an obstacle or reached goal in y coordinate, switch back to main mode
+                        if self.check_collision(left_xpos,left_ypos) or self.check_collision(right_xpos,right_ypos):
+                            state = 1
+                        else:
+                            state = 7                 
+                    else:
+                        print("unknown state")
+                        state = 1
+
+                    print("state is: ",state)
+                    # decide actuation depending on state
+                    if state == 1:
+                        act_out = self.hd_module.test_sample(current_sensor)
+                    elif state == 2:
+                        act_out = 0
+                        print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 3:
+                        act_out = 1
+                        print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 4:
+                        act_out = 2
+                        print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 5:
+                        act_out = 3
+                        print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 6:
+                        act_out = self.hd_module.test_sample_only_y(current_sensor)
+                        print(xpos,ypos)
+                        #print(act_out)
+                    elif state == 7:
+                        act_out = self.hd_module.test_sample_only_x(current_sensor)
+                        #print(xpos,ypos)
+                        print(act_out)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
+
 
                 if act_out == 0:
                     self.pos[0] -= 1
@@ -312,6 +460,13 @@ class game_module:
         stuck_count=[]
         crash_count=[0]*100
         stuck_count=[0]*100
+        x_stuck_count = 0
+        y_stuck_count = 0
+        crash_after_stuck = 0
+        crash_after_xstuck = 0
+        stuck_after_stuck = 0
+        stuck_after_xstuck = 0
+        total_stuck_count = 0
         i=0
         start=time.time()
         for env,goal in zip(test_reader,goal_reader):
@@ -327,6 +482,11 @@ class game_module:
             stuck_bufferx = [0] * 4
             stuck_buffery = [0] * 4
             flag=0
+            state = 1
+            switch_goal = 5
+            trial_had_xstuck = 0
+            trial_had_ystuck = 0
+
             while not_crash:
                 x_stuck_alert = 0
                 y_stuck_alert = 0
@@ -360,34 +520,175 @@ class game_module:
                     # print("STUCK ALERT in X")
                     # print("!!!!!!!!")
                     x_stuck_alert = 1
+                    trial_had_xstuck = 1
+                    #x_stuck_count += 1
+                    #print(x_stuck_count)
 
                 if sum(stuck_buffery) == len(stuck_buffery):
                     # print("!!!!!!!!")
                     # print("STUCK ALERT in Y")
                     # print("!!!!!!!!")
                     y_stuck_alert = 1
+                    trial_had_ystuck = 1
+                    #y_stuck_count += 1
+                    #print(y_stuck_count)
 
-
-
-                # act_out = self.hd_module.test_sample(current_sensor)
-                if self.hd_module.two_states:
+                #print(self.pos[0],self.pos[1])
+                if self.hd_module.two_states: 
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
                         act_out = self.hd_module.test_sample_state1(current_sensor)
                     #elif (self.check_state(self.pos[0],self.pos[1])==2):
                     else:
                         act_out = self.hd_module.test_sample_state2(current_sensor)
-                else:
-                    #If stuck id is active and the flags are on, then go to one of the alternative models
-                    if self.hd_module.stuck_id:
-                        if x_stuck_alert:
-                            act_out = self.hd_module.test_sample_ygoal(current_sensor)
-                        elif y_stuck_alert:
-                            act_out = self.hd_module.test_sample_xgoal(current_sensor)
-                        else:
-                            act_out = self.hd_module.test_sample(current_sensor)
+                elif self.hd_module.stuck_id:
+                    if x_stuck_alert:
+                        act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                    elif y_stuck_alert:
+                        act_out = self.hd_module.test_sample_xgoal(current_sensor)
                     else:
                         act_out = self.hd_module.test_sample(current_sensor)
+                elif self.hd_module.stuck_state_machine:
+                    # decide state for the next move based on current sensor information and state
+                    xpos = self.pos[0]
+                    ypos = self.pos[1]
+                    obs_to_goalx = 0
+                    obs_to_goaly = 0
+                    right_xpos = xpos+1
+                    right_ypos = ypos
+                    left_xpos = xpos-1
+                    left_ypos = ypos
+                    up_xpos = xpos
+                    down_xpos = xpos
+                    up_ypos = ypos-1 #for some reason up means decrement
+                    down_ypos = ypos + 1
+                    delta_x = self.goal_pos[0] - self.pos[0] # if >0 then goal is to right, else left
+                    delta_y = self.goal_pos[1] - self.pos[1] # if >0 then goal is down, else up
 
+                    #check if there is an obstacle in the way to the goal for both the y and x directions
+                    if delta_x > 0:
+                        obs_to_goalx = self.check_collision(right_xpos, right_ypos)
+                    else:
+                        obs_to_goalx = self.check_collision(left_xpos,left_ypos)
+                    if delta_y > 0:
+                        obs_to_goaly = self.check_collision(down_xpos, down_ypos)
+                    else:
+                        obs_to_goalt = self.check_collision(up_xpos, up_ypos)
+
+                    if state == 1:
+                        if x_stuck_alert:
+                            avoidance_steps = 1
+                            switch_goal = 5
+                            if self.check_collision(right_xpos, right_ypos):
+                                state = 2 # go left
+                            else:
+                                state = 3 # go right
+                        elif y_stuck_alert:
+                            avoidance_steps = 1
+                            switch_goal = 5
+                            if self.check_collision(up_xpos,up_ypos):
+                                state = 5 # go down
+                            else:
+                                state = 4 # go up
+                        else:
+                            state = 1 # keep using main method
+                    elif state == 2:
+                        if obs_to_goaly: # if still an obstacle in the way of the y goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(left_xpos,left_ypos):
+                                state = 3 # switch and go right
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 2 # keep going left
+                                avoidance_steps += 1
+                        else:
+                            state = 6 # only y direction recall
+                    elif state == 3:
+                        if obs_to_goaly: # if still an obstacle in the way of the y goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(right_xpos,right_ypos):
+                                state = 2 # switch and go right
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 3 # keep going left
+                                avoidance_steps += 1
+                        else:
+                            state = 6 # only y direction recall
+                    elif state == 4:
+                        if obs_to_goalx: # if still an obstacle in the way of the x goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(up_xpos,up_ypos):
+                                state = 5 # switch and go down
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going up
+                            else:
+                                state = 4 # keep going up
+                                avoidance_steps += 1
+                        else:
+                            state = 7 # only x direction recall
+                    elif state == 5:
+                        if obs_to_goalx: # if still an obstacle in the way of the x goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(down_xpos,down_ypos):
+                                state = 4 # switch and go up
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 5 # keep going down
+                                avoidance_steps += 1
+                        else:
+                            state = 7 # only x direction recall
+                    elif state == 6:
+                        #if hit an obstacle or reached goal in y coordinate, switch back to main mode
+                        if self.check_collision(down_xpos,down_ypos) or self.check_collision(up_xpos,up_ypos):
+                            state = 1
+                        else:
+                            state = 6
+                    elif state == 7:
+                        #if hit an obstacle or reached goal in y coordinate, switch back to main mode
+                        if self.check_collision(left_xpos,left_ypos) or self.check_collision(right_xpos,right_ypos):
+                            state = 1
+                        else:
+                            state = 7                 
+                    else:
+                        print("unknown state")
+                        state = 1
+
+                    #print("state is: ",state)
+                    # decide actuation depending on state
+                    if state == 1:
+                        act_out = self.hd_module.test_sample(current_sensor)
+                    elif state == 2:
+                        act_out = 0
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 3:
+                        act_out = 1
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 4:
+                        act_out = 2
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 5:
+                        act_out = 3
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 6:
+                        act_out = self.hd_module.test_sample_only_y(current_sensor)
+                        #print(xpos,ypos)
+                        #print(act_out)
+                    elif state == 7:
+                        act_out = self.hd_module.test_sample_only_x(current_sensor)
+                        #print(xpos,ypos)
+                        #print(act_out)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
 
 
                 if act_out == 0:
@@ -406,15 +707,27 @@ class game_module:
                     # print('CRASH!')
                     flag=1
                     crash_count[i]=1
+                    if trial_had_ystuck or trial_had_xstuck:
+                        stuck_after_stuck += 1
+                    #if trial_had_xstuck:
+                    #    stuck_after_xstuck += 1
+
                 elif (self.steps >= self.timeout):
                     not_crash = False
                     stuck += 1
                     # print('STUCK!')
                     flag=1
                     stuck_count[i]=1
+                    if trial_had_ystuck or trial_had_xstuck:
+                        crash_after_stuck += 1
+                    #if trial_had_xstuck:
+                    #    crash_after_xstuck += 1                    
 
                 self.steps += 1
             i+=1
+            x_stuck_count += trial_had_xstuck
+            y_stuck_count += trial_had_ystuck
+            total_stuck_count += (trial_had_xstuck or trial_had_ystuck)
             # print('It took ', self.steps, ' steps')
             if flag==1:
                 step_count.append(self.timeout)
@@ -424,10 +737,10 @@ class game_module:
         end=time.time()
 
 
-        print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {}".format(success, crash, stuck,end-start,np.mean(np.array(step_count))))
+        print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {} \t total x_stuck: {} \t total y_stuck {}".format(success, crash, stuck,end-start,np.mean(np.array(step_count)),x_stuck_count,y_stuck_count))
         print("success rate: {:.2f}".format(success/(success+crash+stuck)))
         print('step count ', len(step_count), len(crash_count),len(stuck_count))
-        return success,crash,stuck,step_count, crash_count, stuck_count
+        return success,crash,stuck,step_count, crash_count, stuck_count, x_stuck_count, y_stuck_count, stuck_after_stuck, crash_after_stuck, total_stuck_count
 
 
     def test_game(self, num_test):
@@ -438,11 +751,9 @@ class game_module:
         success = 0
         crash = 0
         stuck = 0
-<<<<<<< HEAD
         self.average_steps = 0
-=======
         success_times=[]
->>>>>>> 49cbbe9b173ba51562385465d3dc663d5233a978
+
         for i in range(num_test):
             not_crash = True
             self.setup_game()
@@ -454,7 +765,16 @@ class game_module:
 
 
             begin_time=time.time()
-
+            # trying to push a state machine into python oops
+            # anyway state 1 is main encoding method
+            # state 2 is move left
+            # state 3 is move right
+            # state 4 is move up
+            # state 5 is move down
+            # state 6 is only_y recall
+            # state 7 is only_x recall
+            state = 1
+            switch_goal = 5
             while not_crash:
                 x_stuck_alert = 0
                 y_stuck_alert = 0
@@ -492,23 +812,162 @@ class game_module:
                     # print("!!!!!!!!")
                     y_stuck_alert=1
 
+                #print(self.pos[0],self.pos[1])
                 if self.hd_module.two_states: 
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
                         act_out = self.hd_module.test_sample_state1(current_sensor)
                     #elif (self.check_state(self.pos[0],self.pos[1])==2):
                     else:
                         act_out = self.hd_module.test_sample_state2(current_sensor)
-                else:
-                    if self.hd_module.stuck_id:
-                        if x_stuck_alert:
-                            act_out = self.hd_module.test_sample_ygoal(current_sensor)
-                        elif y_stuck_alert:
-                            act_out = self.hd_module.test_sample_xgoal(current_sensor)
-                        else:
-                            act_out = self.hd_module.test_sample(current_sensor)
+                elif self.hd_module.stuck_id:
+                    if x_stuck_alert:
+                        act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                    elif y_stuck_alert:
+                        act_out = self.hd_module.test_sample_xgoal(current_sensor)
                     else:
                         act_out = self.hd_module.test_sample(current_sensor)
+                elif self.hd_module.stuck_state_machine:
+                    # decide state for the next move based on current sensor information and state
+                    xpos = self.pos[0]
+                    ypos = self.pos[1]
+                    obs_to_goalx = 0
+                    obs_to_goaly = 0
+                    right_xpos = xpos+1
+                    right_ypos = ypos
+                    left_xpos = xpos-1
+                    left_ypos = ypos
+                    up_xpos = xpos
+                    down_xpos = xpos
+                    up_ypos = ypos-1 #for some reason up means decrement
+                    down_ypos = ypos + 1
+                    delta_x = self.goal_pos[0] - self.pos[0] # if >0 then goal is to right, else left
+                    delta_y = self.goal_pos[1] - self.pos[1] # if >0 then goal is down, else up
 
+                    #check if there is an obstacle in the way to the goal for both the y and x directions
+                    if delta_x > 0:
+                        obs_to_goalx = self.check_collision(right_xpos, right_ypos)
+                    else:
+                        obs_to_goalx = self.check_collision(left_xpos,left_ypos)
+                    if delta_y > 0:
+                        obs_to_goaly = self.check_collision(down_xpos, down_ypos)
+                    else:
+                        obs_to_goalt = self.check_collision(up_xpos, up_ypos)
+
+                    if state == 1:
+                        if x_stuck_alert:
+                            avoidance_steps = 1
+                            switch_goal = 5
+                            if self.check_collision(right_xpos, right_ypos):
+                                state = 2 # go left
+                            else:
+                                state = 3 # go right
+                        elif y_stuck_alert:
+                            avoidance_steps = 1
+                            switch_goal = 5
+                            if self.check_collision(up_xpos,up_ypos):
+                                state = 5 # go down
+                            else:
+                                state = 4 # go up
+                        else:
+                            state = 1 # keep using main method
+                    elif state == 2:
+                        if obs_to_goaly: # if still an obstacle in the way of the y goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(left_xpos,left_ypos):
+                                state = 3 # switch and go right
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 2 # keep going left
+                                avoidance_steps += 1
+                        else:
+                            state = 6 # only y direction recall
+                    elif state == 3:
+                        if obs_to_goaly: # if still an obstacle in the way of the y goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(right_xpos,right_ypos):
+                                state = 2 # switch and go right
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 3 # keep going left
+                                avoidance_steps += 1
+                        else:
+                            state = 6 # only y direction recall
+                    elif state == 4:
+                        if obs_to_goalx: # if still an obstacle in the way of the x goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(up_xpos,up_ypos):
+                                state = 5 # switch and go down
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going up
+                            else:
+                                state = 4 # keep going up
+                                avoidance_steps += 1
+                        else:
+                            state = 7 # only x direction recall
+                    elif state == 5:
+                        if obs_to_goalx: # if still an obstacle in the way of the x goal direction
+                            # if timed out going left or hit an obstacle, switch directions
+                            if (avoidance_steps > switch_goal) or self.check_collision(down_xpos,down_ypos):
+                                state = 4 # switch and go up
+                                avoidance_steps = 1
+                                switch_goal += 5
+                            # else keep going left
+                            else:
+                                state = 5 # keep going down
+                                avoidance_steps += 1
+                        else:
+                            state = 7 # only x direction recall
+                    elif state == 6:
+                        #if hit an obstacle or reached goal in y coordinate, switch back to main mode
+                        if self.check_collision(down_xpos,down_ypos) or self.check_collision(up_xpos,up_ypos):
+                            state = 1
+                        else:
+                            state = 6
+                    elif state == 7:
+                        #if hit an obstacle or reached goal in y coordinate, switch back to main mode
+                        if self.check_collision(left_xpos,left_ypos) or self.check_collision(right_xpos,right_ypos):
+                            state = 1
+                        else:
+                            state = 7                 
+                    else:
+                        print("unknown state")
+                        state = 1
+
+                    #print("state is: ",state)
+                    # decide actuation depending on state
+                    if state == 1:
+                        act_out = self.hd_module.test_sample(current_sensor)
+                    elif state == 2:
+                        act_out = 0
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 3:
+                        act_out = 1
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 4:
+                        act_out = 2
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 5:
+                        act_out = 3
+                        #print(act_out)
+                        #print(xpos,ypos)
+                    elif state == 6:
+                        act_out = self.hd_module.test_sample_only_y(current_sensor)
+                        #print(xpos,ypos)
+                        #print(act_out)
+                    elif state == 7:
+                        act_out = self.hd_module.test_sample_only_x(current_sensor)
+                        #print(xpos,ypos)
+                        #print(act_out)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
 
                 if act_out == 0:
                     self.pos[0] -= 1

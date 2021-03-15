@@ -22,6 +22,8 @@ thresholds = np.linspace(0,1,101)
 threshold_nostate = 0.05
 threshold_state1 = 0.16
 threshold_state2 = 0.04
+threshold_only_x = 0.79
+threshold_only_y = 0.52
 softmax_param = 7.79
 softmax_param_state1 = 10.12
 softmax_param_state2 = 10.12
@@ -59,12 +61,9 @@ softmax_param_state2 = 10.12
 success=np.empty((len(thresholds),))
 crash=np.empty((len(thresholds),))
 stuck=np.empty((len(thresholds),))
-<<<<<<< HEAD
 steps = np.empty((len(thresholds),))
-=======
 success_times=np.empty((len(thresholds),))
 
->>>>>>> 49cbbe9b173ba51562385465d3dc663d5233a978
 num_cond_list = np.empty((len(thresholds),))
 num_thrown_list = np.empty((len(thresholds),))
 sum_success = 0
@@ -76,9 +75,11 @@ average_steps = 0
 for i,threshold in enumerate(thresholds):
     a = game_module('./data/outfname.out',15)
     #a.set_sensor_weight(weight)
-    a.set_threshold_known(threshold_nostate)
+    a.set_threshold_known(threshold)
     a.set_threshold_known_state1(threshold_state1)
     a.set_threshold_known_state2(threshold_state2)
+    a.set_threshold_known_only_x(threshold_only_x)
+    a.set_threshold_known_only_y(threshold_only_y)
     a.set_softmax_param(softmax_param)
     a.set_softmax_param_state1(softmax_param_state1)
     a.set_softmax_param_state2(softmax_param_state2)
@@ -87,20 +88,18 @@ for i,threshold in enumerate(thresholds):
     a.train_from_file(train_file)
     num_thrown_list[i] = a.num_thrown
     num_cond_list[i] = a.num_cond
-<<<<<<< HEAD
     #steps[i] = a.average_steps
     #print(num_thrown_list[i]/n_samples)
     #print(num_cond_list[i]/n_samples)
     success[i], crash[i], stuck[i],steps[i] = a.test_game(trials)
     #print(crash[i])
     #print(stuck[i])
-=======
     print(num_thrown_list[i]/n_samples)
     print(num_cond_list[i]/n_samples)
-    success[i], crash[i], stuck[i], success_times[i] = a.test_game(trials)
+    #success[i], crash[i], stuck[i], success_times[i] = a.test_game(trials)
     print(crash[i])
     print(stuck[i])
->>>>>>> 49cbbe9b173ba51562385465d3dc663d5233a978
+
     sum_success += success[i]/trials
     if success[i]/trials > best_success:
         best_success = success[i]/trials

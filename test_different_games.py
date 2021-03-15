@@ -32,6 +32,11 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file)
     crashes=[0]*test_num
     stucks=[0]*test_num
     mean_steps_success=[0]*test_num
+    triggered_x_stuck = [0]*test_num
+    triggered_y_stuck = [0]*test_num
+    stuck_after_stuck = [0]*test_num
+    crash_after_stuck = [0]*test_num
+    stuck_count = [0]*test_num
 
     for i in range(test_num):
 
@@ -43,13 +48,22 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file)
         crashes[i]=float(out[1]/len(out[3]))
         stucks[i]=float(out[2]/len(out[3]))
         mean_steps_success[i]=np.mean(np.array([num for inum,num in enumerate(out[3]) if out[4][inum]<1]))
+        triggered_x_stuck[i] = out[6]
+        triggered_y_stuck[i] = out[7]
+        stuck_after_stuck[i] = out[8]
+        #stuck_after_ystuck = out[9]
+        crash_after_stuck[i] = out[9]
+        stuck_count[i] = out[10]
+        #crash_after_ystuck = out[11]
+        #print('triggered_x_stuck: ', triggered_x_stuck)
+        #print('triggered_y_stuck: ', triggered_y_stuck)
 
-    return successes,crashes,stucks,mean_steps_success
+    return successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck, stuck_after_stuck,crash_after_stuck
 
 
 trials=100
 
-obstacle_list=[5,10,15,20]
+obstacle_list=[15]
 
 #The 'avoid' training is done on worlds with 20 obstacles -- the assumption is that it willbe good at both obstacle avoidance and goal reaching
 #The 'goal' training is done on worlds with 5 obstacles -- the assumption is that it may reach the goal fast when it can (but it does crash often)
@@ -87,13 +101,19 @@ for on,obstacles in enumerate(obstacle_list):
 
             #For these experiments I'm just using the datasets generated for the two state case
             train_file='./data/game_data_2state_based.out'
-            test_num=10
-            successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file)
+            test_num=100
+            successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck,stuck_after_stuck,crash_after_stuck,stuck_count=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file)
             mean_successes=np.mean(np.array(successes))
             mean_crashes=np.mean(np.array(crashes))
             mean_stucks=np.mean(np.array(stucks))
             mean_steps_success=np.mean(np.array(mean_steps_success))
-
+            mean_triggered_x_stuck = np.mean(np.array(triggered_x_stuck))
+            mean_triggered_y_stuck = np.mean(np.array(triggered_y_stuck))
+            mean_stuck_after_stuck = np.mean(np.array(stuck_after_stuck))
+            #mean_stuck_after_ystuck = np.mean(np.array(stuck_after_ystuck))
+            mean_crash_after_stuck = np.mean(np.array(crash_after_stuck))
+            #mean_crash_after_ystuck = np.mean(np.array(crash_after_ystuck))
+            mean_stuck_count = np.mean(np.array(stuck_count))
             successes_dict[type_train][on]=mean_successes
             crashes_dict[type_train][on]=mean_crashes
             stucks_dict[type_train][on]=mean_stucks
@@ -103,3 +123,11 @@ for on,obstacles in enumerate(obstacle_list):
             print('Mean crashes ', mean_crashes)
             print('Mean stucks ', mean_stucks)
             print('Mean steps success ', mean_steps_success)
+            print('mean total triggered x stuck across the 100 environments',mean_triggered_x_stuck)
+            print('mean total triggered y stuck across the 100 environments',mean_triggered_y_stuck)
+            print('mean total stuck count across the 100 environments: ',mean_stuck_count)
+            print('mean total stuck after stuck triggered across 100 environments',mean_stuck_after_stuck)
+            #print('mean total stuck after y stuck triggered across 100 environments',mean_stuck_after_ystuck)
+            print('mean total crash after stuck triggered across 100 environments',mean_crash_after_stuck)
+            #print('mean total crash after y stuck triggered across 100 environments',mean_crash_after_ystuck)
+
