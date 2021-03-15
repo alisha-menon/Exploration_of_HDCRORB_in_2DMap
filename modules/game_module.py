@@ -197,6 +197,20 @@ class game_module:
         self.hd_module.softmax_param_state2 = softmax_param
         return
 
+    def game_inspect_env(self, gametype, obsid, goalid,filename=None):
+        pygame.init()
+        screen = pygame.display.set_mode(self.pixel_dim)
+        clock = pygame.time.Clock()
+        self.setup_game(obs_id=obsid, goal_id=goalid)
+        self.game_step(gametype, screen)
+        if filename:
+            print(filename)
+            pygame.image.save(screen, filename)
+        pygame.display.update()
+        clock.tick(2)
+        for i in range(100):
+            j=1
+
     def autoplay_game(self, gametype):
         pygame.init()
         screen = pygame.display.set_mode(self.pixel_dim)
@@ -446,7 +460,118 @@ class game_module:
         return
 
 
+    def play_display_game(self, gametype, obstacles, goal):
+        pygame.init()
+        screen = pygame.display.set_mode(self.pixel_dim)
+        clock = pygame.time.Clock()
+        running = True
+        not_crash = True
+
+        last_act = 0
+
+        self.setup_game(obs_id=obstacles,goal_id=goal)
+        self.steps = 0
+        buffer_x_delta=[1]*4
+        buffer_y_delta=[1]*4
+        stuck_bufferx=[0]*4
+        stuck_buffery=[0]*4
+
+        while not_crash:
+            x_stuck_alert = 0
+            y_stuck_alert = 0
+            self.game_step(gametype, screen)
+            pygame.display.update()
+
+            clock.tick(3)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    not_crash = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.setup_game()
+
+            current_sensor = self.get_sensor()
+            current_sensor.append(last_act)
+
+            buffer_x_delta.pop(0)
+            buffer_y_delta.pop(0)
+            buffer_x_delta.append(current_sensor[4])
+            buffer_y_delta.append(current_sensor[5])
+            stuck_bufferx.pop(0)
+            stuck_buffery.pop(0)
+
+            is_stuck=self.check_behaviour(buffer_x_delta,buffer_y_delta)
+
+            stuck_bufferx.append(is_stuck[0])
+            stuck_buffery.append(is_stuck[1])
+
+            if sum(stuck_bufferx) == len(stuck_bufferx):
+                print("!!!!!!!!")
+                print("STUCK ALERT in X")
+                print("!!!!!!!!")
+                x_stuck_alert = 1
+
+            if sum(stuck_buffery) == len(stuck_buffery):
+                print("!!!!!!!!")
+                print("STUCK ALERT in Y")
+                print("!!!!!!!!")
+                y_stuck_alert = 1
+
+            if self.hd_module.two_states:
+                if (self.check_state(self.pos[0],self.pos[1]) == 1):
+                    act_out = self.hd_module.test_sample_state1(current_sensor)
+                #elif (self.check_state(self.pos[0],self.pos[1])==2):
+                else:
+                    act_out = self.hd_module.test_sample_state2(current_sensor)
+            else:
+                if self.hd_module.stuck_id:
+                    if x_stuck_alert:
+                        print('Alert in x, using x goal model')
+                        act_out = self.hd_module.test_sample_xgoal(current_sensor)
+                    elif y_stuck_alert:
+                        print('Alert in y, using y goal model')
+                        act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                    else:
+                        act_out = self.hd_module.test_sample(current_sensor)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
+
+            if act_out == 0:
+                self.pos[0] -= 1
+            elif act_out == 1:
+                self.pos[0] += 1
+            elif act_out == 2:
+                self.pos[1] -= 1
+            elif act_out == 3:
+                self.pos[1] += 1
+
+            last_act = act_out
+            if (self.check_collision(self.pos[0], self.pos[1])):
+                not_crash = False
+                print(not_crash)
+            if (self.steps >= self.timeout):
+                not_crash = False
+                print(not_crash)
+
+            self.steps += 1
+
+            self.game_step(gametype, screen)
+            pygame.display.update()
+
+        event2 = pygame.event.wait()
+        if event2.type == pygame.QUIT:
+            running = False
+        elif event2.type == pygame.KEYDOWN:
+            not_crash = True
+
+        pygame.display.quit()
+        pygame.quit()
+        return
+
     def play_game_from_file(self, test_filename,goal_filename):
+
+        # f = open(self.outfile, 'w')
 
         test_reader=csv.reader(open(test_filename,'r'))
         goal_reader=csv.reader(open(goal_filename,'r'))
@@ -457,9 +582,9 @@ class game_module:
         crash = 0
         stuck = 0
         step_count=[]
-        stuck_count=[]
         crash_count=[0]*100
         stuck_count=[0]*100
+<<<<<<< HEAD
         x_stuck_count = 0
         y_stuck_count = 0
         crash_after_stuck = 0
@@ -468,9 +593,25 @@ class game_module:
         stuck_after_xstuck = 0
         total_stuck_count = 0
         i=0
+=======
+
+        diagnose=[[]]*100
+        # for x in diagnose[0]: x = 0
+
+        #Diagnose
+        #0: reached goal
+        #1: crash
+        #2: time-out
+        #3: stuck
+        #were these stuck flags equal to 1 upon exit from the while loop?
+           #4: x_stuck_alert
+           #5: y_stuck_alert
+
+        # i=0
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
         start=time.time()
-        for env,goal in zip(test_reader,goal_reader):
-            # print('\nNEW ENV')
+        for env,goal,i in zip(test_reader,goal_reader,range(100)):
+            diagnose[i]=[0,0,0,0,0,0]
             not_crash = True
             self.setup_game(obs_id=[int(ev) for ev in env],goal_id=[int(go) for go in goal])
             # self.setup_game(obs_id=[int(ev) for ev in env])
@@ -481,21 +622,30 @@ class game_module:
             buffer_y_delta = [1] * 4
             stuck_bufferx = [0] * 4
             stuck_buffery = [0] * 4
+<<<<<<< HEAD
             flag=0
             state = 1
             switch_goal = 5
             trial_had_xstuck = 0
             trial_had_ystuck = 0
 
+=======
+            flag_goal=0
+            flag_crash=0
+            flag_timeout=0
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
             while not_crash:
                 x_stuck_alert = 0
                 y_stuck_alert = 0
                 if self.goal_pos == self.pos:
                     success += 1
+                    flag_goal=1
                     break
 
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
+
+
 
                 #Updating buffers... not very elegantly
                 buffer_x_delta.pop(0)
@@ -533,8 +683,13 @@ class game_module:
                     #y_stuck_count += 1
                     #print(y_stuck_count)
 
+<<<<<<< HEAD
                 #print(self.pos[0],self.pos[1])
                 if self.hd_module.two_states: 
+=======
+                # act_out = self.hd_module.test_sample(current_sensor)
+                if self.hd_module.two_states:
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
                         act_out = self.hd_module.test_sample_state1(current_sensor)
                     #elif (self.check_state(self.pos[0],self.pos[1])==2):
@@ -659,6 +814,7 @@ class game_module:
                         print("unknown state")
                         state = 1
 
+<<<<<<< HEAD
                     #print("state is: ",state)
                     # decide actuation depending on state
                     if state == 1:
@@ -689,6 +845,10 @@ class game_module:
                         #print(act_out)
                 else:
                     act_out = self.hd_module.test_sample(current_sensor)
+=======
+                sensor_str = "{}, {}, {}, {}, {}, {}, {}".format(*current_sensor)
+                # f.write(sensor_str + ", " + str(act_out) + "\n")
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
 
 
                 if act_out == 0:
@@ -705,19 +865,22 @@ class game_module:
                     not_crash = False
                     crash += 1
                     # print('CRASH!')
-                    flag=1
                     crash_count[i]=1
+<<<<<<< HEAD
                     if trial_had_ystuck or trial_had_xstuck:
                         stuck_after_stuck += 1
                     #if trial_had_xstuck:
                     #    stuck_after_xstuck += 1
 
+=======
+                    flag_crash=1
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
                 elif (self.steps >= self.timeout):
                     not_crash = False
                     stuck += 1
                     # print('STUCK!')
-                    flag=1
                     stuck_count[i]=1
+<<<<<<< HEAD
                     if trial_had_ystuck or trial_had_xstuck:
                         crash_after_stuck += 1
                     #if trial_had_xstuck:
@@ -728,11 +891,39 @@ class game_module:
             x_stuck_count += trial_had_xstuck
             y_stuck_count += trial_had_ystuck
             total_stuck_count += (trial_had_xstuck or trial_had_ystuck)
+=======
+                    flag_timeout=1
+
+                self.steps += 1
+            # i+=1
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
             # print('It took ', self.steps, ' steps')
-            if flag==1:
+            if flag_crash or flag_timeout==1:
                 step_count.append(self.timeout)
-            elif flag==0:
+            elif flag_goal==1:
                 step_count.append(self.steps)
+
+            # 0: reached goal
+            # 1: crash
+            # 2: time-out
+            # 3: stuck
+            # were these stuck flags equal to 1 upon exit from the while loop?
+            # 4: x_stuck_alert
+            # 5: y_stuck_alert
+            if flag_goal:
+                diagnose[i][0]=1
+            if flag_crash:
+                diagnose[i][1]=1
+            if flag_timeout:
+                diagnose[i][2]=1
+                diagnose[i][3]=1
+
+            if x_stuck_alert==1:
+                diagnose[i][4]=1
+            if y_stuck_alert==1:
+                diagnose[i][5]=1
+
+
 
         end=time.time()
 
@@ -740,7 +931,11 @@ class game_module:
         print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {} \t total x_stuck: {} \t total y_stuck {}".format(success, crash, stuck,end-start,np.mean(np.array(step_count)),x_stuck_count,y_stuck_count))
         print("success rate: {:.2f}".format(success/(success+crash+stuck)))
         print('step count ', len(step_count), len(crash_count),len(stuck_count))
+<<<<<<< HEAD
         return success,crash,stuck,step_count, crash_count, stuck_count, x_stuck_count, y_stuck_count, stuck_after_stuck, crash_after_stuck, total_stuck_count
+=======
+        return success,crash,stuck,step_count, crash_count, stuck_count, diagnose
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
 
 
     def test_game(self, num_test):
@@ -751,6 +946,10 @@ class game_module:
         success = 0
         crash = 0
         stuck = 0
+<<<<<<< HEAD
+=======
+
+>>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
         self.average_steps = 0
         success_times=[]
 
@@ -762,7 +961,6 @@ class game_module:
             buffer_y_delta=[1]*4
             stuck_bufferx=[0]*4
             stuck_buffery=[0]*4
-
 
             begin_time=time.time()
             # trying to push a state machine into python oops
@@ -784,6 +982,7 @@ class game_module:
                     end_time=time.time()
                     time_total=end_time-begin_time
                     success_times.append(time_total)
+
                     break
 
                 current_sensor = self.get_sensor()
@@ -987,6 +1186,7 @@ class game_module:
                     stuck += 1
 
                 self.steps += 1
+
             self.average_steps += self.steps
 
         self.average_steps = self.average_steps / num_test
