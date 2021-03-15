@@ -61,8 +61,6 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file,
         #print('triggered_x_stuck: ', triggered_x_stuck)
         #print('triggered_y_stuck: ', triggered_y_stuck)
 
-
-    #return successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck, stuck_after_stuck,crash_after_stuck
         for nsample,sample in enumerate(out[-1]):
             out_stats[nsample]=[otold+otnew for otold,otnew in zip(out_stats[nsample],sample)]
 
@@ -107,7 +105,8 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file,
 
         print('Writing result to ', stats_file)
 
-    return successes,crashes,stucks,mean_steps_success
+    #return successes,crashes,stucks,mean_steps_success
+    return successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck, stuck_after_stuck,crash_after_stuck
 
 
 #####################
@@ -155,15 +154,15 @@ for on,obstacles in enumerate(obstacle_list):
             #For these experiments I'm just using the datasets generated for the two state case
             train_file='./data/game_data_2state_based.out'
             test_num=100
-            #successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck,stuck_after_stuck,crash_after_stuck,stuck_count=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file)
-
             test_num=10
             #print a snapshot of the environments that present crash instances
             inspect_test_environments=0
             #write the proportion of tests results (successes, stucks, time-out, etc) to file
             performance_stats=0
 
-            successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file, inspect_test_environments,performance_stats,out_filename)
+            #successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file, inspect_test_environments,performance_stats,out_filename)
+            successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck,stuck_after_stuck,crash_after_stuck,stuck_count=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file)
+
             mean_successes=np.mean(np.array(successes))
             mean_crashes=np.mean(np.array(crashes))
             mean_stucks=np.mean(np.array(stucks))
