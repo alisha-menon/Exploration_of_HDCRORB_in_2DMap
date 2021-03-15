@@ -28,16 +28,17 @@ def generate_dataset(obstacle_dataset_file,goal_dataset_file,obstacles,trials):
         a.random_goal_location()
         csv_writer_goal.writerow(a.goal_pos)
 
-def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file, inspect_envs):
+def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file, inspect_envs, performance_stats,out_filename):
 
     successes=[0]*test_num
     crashes=[0]*test_num
     stucks=[0]*test_num
     mean_steps_success=[0]*test_num
 
+    out_stats=[[0]*6]*100
     for i in range(test_num):
         print('Trial number ', i)
-        a = game_module('./data/tests.out',obstacles)
+        a = game_module(out_filename,obstacles)
         a.train_from_file(train_file)
         out=a.play_game_from_file(obstacle_dataset_file,goal_dataset_file)
         # success, crash, stuck, step_count, crash_count, stuck_count
@@ -45,6 +46,10 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file,
         crashes[i]=float(out[1]/len(out[3]))
         stucks[i]=float(out[2]/len(out[3]))
         mean_steps_success[i]=np.mean(np.array([num for inum,num in enumerate(out[3]) if out[4][inum]<1]))
+
+        for nsample,sample in enumerate(out[-1]):
+            out_stats[nsample]=[otold+otnew for otold,otnew in zip(out_stats[nsample],sample)]
+
 
         if inspect_envs:
             #Environments that threw a timeout (stuck)
@@ -67,13 +72,29 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file,
                 if not os.path.exists('./inspect_figs/obs_env_' + str(obstacles) + '_sn_'+ str(stuck_env) + ".jpg"):
                     gm.game_inspect_env('1',[int(num) for num in test_ids[stuck_env]], [int(num) for num in goal_ids[stuck_env]], filename='./inspect_figs/obs_env_' + str(obstacles) + '_sn_'+ str(stuck_env) + ".jpg")
 
-            # print('Time out ', sum([ot[2] for ot in out[-1]]) )
-            # print('Stuck ', sum([ot[3] for ot in out[-1]]) )
-            # print('xStuck ', sum([ot[4] for ot in out[-1]]) )
-            # print('yStuck ', sum([ot[5] for ot in out[-1]]) )
+            #Environments with crashes (stuck)
+            crash_envs=[]
+            for i, ot in enumerate(out[-1]):
+                if ot[1]==1:
+                    crash_envs.append(i)
+
+    if performance_stats:
+        if not os.path.exists('./performance_stats'):
+            os.makedirs('./performance_stats')
+
+        stats_file='./performance_stats/environment_' + str(obstacles) + '_obstacles.csv'
+        csv_writer=csv.writer(open(stats_file,'w'))
+        csv_writer.writerow(['succeses', 'crashes', 'time-out', 'stuck', 'x_stuck_alert', 'y_stuck_alert'])
+        for line in out_stats:
+            normline=[num/10 for num in line]
+            csv_writer.writerow(normline)
+
+        print('Writing result to ', stats_file)
 
     return successes,crashes,stucks,mean_steps_success
 
+
+#####################
 
 trials=100
 
@@ -94,6 +115,8 @@ for on,obstacles in enumerate(obstacle_list):
 
     obstacle_dataset_file = './data/obstacles_' + str(obstacles) + '.csv'
     goal_dataset_file = './data/goals_' + str(obstacles) + '.csv'
+
+    out_filename='.out_obs_' + str(obstacles) + '.csv'
 
     generate_datasets=0
 
@@ -116,9 +139,12 @@ for on,obstacles in enumerate(obstacle_list):
             #For these experiments I'm just using the datasets generated for the two state case
             train_file='./data/game_data_2state_based.out'
             test_num=10
-            inspect_test_environments=1
+            #print a snapshot of the environments that present crash instances
+            inspect_test_environments=0
+            #write the proportion of tests results (successes, stucks, time-out, etc) to file
+            performance_stats=0
 
-            successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file, inspect_test_environments)
+            successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file, inspect_test_environments,performance_stats,out_filename)
             mean_successes=np.mean(np.array(successes))
             mean_crashes=np.mean(np.array(crashes))
             mean_stucks=np.mean(np.array(stucks))
