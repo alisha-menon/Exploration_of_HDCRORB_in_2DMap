@@ -312,7 +312,118 @@ class game_module:
         return
 
 
+    def play_display_game(self, gametype, obstacles, goal):
+        pygame.init()
+        screen = pygame.display.set_mode(self.pixel_dim)
+        clock = pygame.time.Clock()
+        running = True
+        not_crash = True
+
+        last_act = 0
+
+        self.setup_game(obs_id=obstacles,goal_id=goal)
+        self.steps = 0
+        buffer_x_delta=[1]*4
+        buffer_y_delta=[1]*4
+        stuck_bufferx=[0]*4
+        stuck_buffery=[0]*4
+
+        while not_crash:
+            x_stuck_alert = 0
+            y_stuck_alert = 0
+            self.game_step(gametype, screen)
+            pygame.display.update()
+
+            clock.tick(3)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    not_crash = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        self.setup_game()
+
+            current_sensor = self.get_sensor()
+            current_sensor.append(last_act)
+
+            buffer_x_delta.pop(0)
+            buffer_y_delta.pop(0)
+            buffer_x_delta.append(current_sensor[4])
+            buffer_y_delta.append(current_sensor[5])
+            stuck_bufferx.pop(0)
+            stuck_buffery.pop(0)
+
+            is_stuck=self.check_behaviour(buffer_x_delta,buffer_y_delta)
+
+            stuck_bufferx.append(is_stuck[0])
+            stuck_buffery.append(is_stuck[1])
+
+            if sum(stuck_bufferx) == len(stuck_bufferx):
+                print("!!!!!!!!")
+                print("STUCK ALERT in X")
+                print("!!!!!!!!")
+                x_stuck_alert = 1
+
+            if sum(stuck_buffery) == len(stuck_buffery):
+                print("!!!!!!!!")
+                print("STUCK ALERT in Y")
+                print("!!!!!!!!")
+                y_stuck_alert = 1
+
+            if self.hd_module.two_states:
+                if (self.check_state(self.pos[0],self.pos[1]) == 1):
+                    act_out = self.hd_module.test_sample_state1(current_sensor)
+                #elif (self.check_state(self.pos[0],self.pos[1])==2):
+                else:
+                    act_out = self.hd_module.test_sample_state2(current_sensor)
+            else:
+                if self.hd_module.stuck_id:
+                    if x_stuck_alert:
+                        print('Alert in x, using x goal model')
+                        act_out = self.hd_module.test_sample_xgoal(current_sensor)
+                    elif y_stuck_alert:
+                        print('Alert in y, using y goal model')
+                        act_out = self.hd_module.test_sample_ygoal(current_sensor)
+                    else:
+                        act_out = self.hd_module.test_sample(current_sensor)
+                else:
+                    act_out = self.hd_module.test_sample(current_sensor)
+
+            if act_out == 0:
+                self.pos[0] -= 1
+            elif act_out == 1:
+                self.pos[0] += 1
+            elif act_out == 2:
+                self.pos[1] -= 1
+            elif act_out == 3:
+                self.pos[1] += 1
+
+            last_act = act_out
+            if (self.check_collision(self.pos[0], self.pos[1])):
+                not_crash = False
+                print(not_crash)
+            if (self.steps >= self.timeout):
+                not_crash = False
+                print(not_crash)
+
+            self.steps += 1
+
+            self.game_step(gametype, screen)
+            pygame.display.update()
+
+        event2 = pygame.event.wait()
+        if event2.type == pygame.QUIT:
+            running = False
+        elif event2.type == pygame.KEYDOWN:
+            not_crash = True
+
+        pygame.display.quit()
+        pygame.quit()
+        return
+
     def play_game_from_file(self, test_filename,goal_filename):
+
+        # f = open(self.outfile, 'w')
 
         test_reader=csv.reader(open(test_filename,'r'))
         goal_reader=csv.reader(open(goal_filename,'r'))
@@ -366,6 +477,8 @@ class game_module:
                 current_sensor = self.get_sensor()
                 current_sensor.append(last_act)
 
+
+
                 #Updating buffers... not very elegantly
                 buffer_x_delta.pop(0)
                 buffer_y_delta.pop(0)
@@ -396,8 +509,6 @@ class game_module:
                     # print("!!!!!!!!")
                     y_stuck_alert = 1
 
-
-
                 # act_out = self.hd_module.test_sample(current_sensor)
                 if self.hd_module.two_states:
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
@@ -417,6 +528,8 @@ class game_module:
                     else:
                         act_out = self.hd_module.test_sample(current_sensor)
 
+                sensor_str = "{}, {}, {}, {}, {}, {}, {}".format(*current_sensor)
+                # f.write(sensor_str + ", " + str(act_out) + "\n")
 
 
                 if act_out == 0:
@@ -469,6 +582,7 @@ class game_module:
                 diagnose[i][4]=1
             if y_stuck_alert==1:
                 diagnose[i][5]=1
+
 
 
         end=time.time()
