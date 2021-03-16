@@ -161,7 +161,7 @@ for on,obstacles in enumerate(obstacle_list):
             performance_stats=0
 
             #successes,crashes,stucks,mean_steps_success=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file, inspect_test_environments,performance_stats,out_filename)
-            successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck,stuck_after_stuck,crash_after_stuck,stuck_count=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file)
+            successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck,stuck_after_stuck,crash_after_stuck,stuck_count=play_game_files(train_file, test_num, obstacle_dataset_file, goal_dataset_file,inspect_test_environments,performance_stats,out_filename)
 
             mean_successes=np.mean(np.array(successes))
             mean_crashes=np.mean(np.array(crashes))

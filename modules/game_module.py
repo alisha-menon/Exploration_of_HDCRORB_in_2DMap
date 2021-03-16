@@ -584,7 +584,6 @@ class game_module:
         step_count=[]
         crash_count=[0]*100
         stuck_count=[0]*100
-<<<<<<< HEAD
         x_stuck_count = 0
         y_stuck_count = 0
         crash_after_stuck = 0
@@ -593,7 +592,6 @@ class game_module:
         stuck_after_xstuck = 0
         total_stuck_count = 0
         i=0
-=======
 
         diagnose=[[]]*100
         # for x in diagnose[0]: x = 0
@@ -608,7 +606,6 @@ class game_module:
            #5: y_stuck_alert
 
         # i=0
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
         start=time.time()
         for env,goal,i in zip(test_reader,goal_reader,range(100)):
             diagnose[i]=[0,0,0,0,0,0]
@@ -622,18 +619,15 @@ class game_module:
             buffer_y_delta = [1] * 4
             stuck_bufferx = [0] * 4
             stuck_buffery = [0] * 4
-<<<<<<< HEAD
             flag=0
             state = 1
             switch_goal = 5
             trial_had_xstuck = 0
             trial_had_ystuck = 0
 
-=======
             flag_goal=0
             flag_crash=0
             flag_timeout=0
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
             while not_crash:
                 x_stuck_alert = 0
                 y_stuck_alert = 0
@@ -683,13 +677,10 @@ class game_module:
                     #y_stuck_count += 1
                     #print(y_stuck_count)
 
-<<<<<<< HEAD
                 #print(self.pos[0],self.pos[1])
-                if self.hd_module.two_states: 
-=======
+                #if self.hd_module.two_states: 
                 # act_out = self.hd_module.test_sample(current_sensor)
                 if self.hd_module.two_states:
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
                     if (self.check_state(self.pos[0],self.pos[1]) == 1):
                         act_out = self.hd_module.test_sample_state1(current_sensor)
                     #elif (self.check_state(self.pos[0],self.pos[1])==2):
@@ -813,8 +804,6 @@ class game_module:
                     else:
                         print("unknown state")
                         state = 1
-
-<<<<<<< HEAD
                     #print("state is: ",state)
                     # decide actuation depending on state
                     if state == 1:
@@ -845,11 +834,8 @@ class game_module:
                         #print(act_out)
                 else:
                     act_out = self.hd_module.test_sample(current_sensor)
-=======
                 sensor_str = "{}, {}, {}, {}, {}, {}, {}".format(*current_sensor)
                 # f.write(sensor_str + ", " + str(act_out) + "\n")
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
-
 
                 if act_out == 0:
                     self.pos[0] -= 1
@@ -866,21 +852,16 @@ class game_module:
                     crash += 1
                     # print('CRASH!')
                     crash_count[i]=1
-<<<<<<< HEAD
                     if trial_had_ystuck or trial_had_xstuck:
                         stuck_after_stuck += 1
                     #if trial_had_xstuck:
                     #    stuck_after_xstuck += 1
-
-=======
                     flag_crash=1
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
                 elif (self.steps >= self.timeout):
                     not_crash = False
                     stuck += 1
                     # print('STUCK!')
                     stuck_count[i]=1
-<<<<<<< HEAD
                     if trial_had_ystuck or trial_had_xstuck:
                         crash_after_stuck += 1
                     #if trial_had_xstuck:
@@ -891,12 +872,9 @@ class game_module:
             x_stuck_count += trial_had_xstuck
             y_stuck_count += trial_had_ystuck
             total_stuck_count += (trial_had_xstuck or trial_had_ystuck)
-=======
-                    flag_timeout=1
+            flag_timeout=1
 
-                self.steps += 1
             # i+=1
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
             # print('It took ', self.steps, ' steps')
             if flag_crash or flag_timeout==1:
                 step_count.append(self.timeout)
@@ -931,11 +909,8 @@ class game_module:
         print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {} \t total x_stuck: {} \t total y_stuck {}".format(success, crash, stuck,end-start,np.mean(np.array(step_count)),x_stuck_count,y_stuck_count))
         print("success rate: {:.2f}".format(success/(success+crash+stuck)))
         print('step count ', len(step_count), len(crash_count),len(stuck_count))
-<<<<<<< HEAD
-        return success,crash,stuck,step_count, crash_count, stuck_count, x_stuck_count, y_stuck_count, stuck_after_stuck, crash_after_stuck, total_stuck_count
-=======
-        return success,crash,stuck,step_count, crash_count, stuck_count, diagnose
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
+        return success,crash,stuck,step_count, crash_count, stuck_count, x_stuck_count, y_stuck_count, stuck_after_stuck, crash_after_stuck, total_stuck_count, diagnose
+        #return success,crash,stuck,step_count, crash_count, stuck_count, diagnose
 
 
     def test_game(self, num_test):
@@ -946,10 +921,6 @@ class game_module:
         success = 0
         crash = 0
         stuck = 0
-<<<<<<< HEAD
-=======
-
->>>>>>> d5eebc6dc839ee376be88a8e9dc7e0e0528530ad
         self.average_steps = 0
         success_times=[]
 
