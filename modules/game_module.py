@@ -607,8 +607,8 @@ class game_module:
 
         # i=0
         start=time.time()
-        for env,goal,i in zip(test_reader,goal_reader,range(100)):
-            diagnose[i]=[0,0,0,0,0,0]
+        for env,goal,j in zip(test_reader,goal_reader,range(100)):
+            diagnose[j]=[0,0,0,0,0,0]
             not_crash = True
             self.setup_game(obs_id=[int(ev) for ev in env],goal_id=[int(go) for go in goal])
             # self.setup_game(obs_id=[int(ev) for ev in env])
@@ -889,17 +889,17 @@ class game_module:
             # 4: x_stuck_alert
             # 5: y_stuck_alert
             if flag_goal:
-                diagnose[i][0]=1
+                diagnose[j][0]=1
             if flag_crash:
-                diagnose[i][1]=1
+                diagnose[j][1]=1
             if flag_timeout:
-                diagnose[i][2]=1
-                diagnose[i][3]=1
+                diagnose[j][2]=1
+                diagnose[j][3]=1
 
             if x_stuck_alert==1:
-                diagnose[i][4]=1
+                diagnose[j][4]=1
             if y_stuck_alert==1:
-                diagnose[i][5]=1
+                diagnose[j][5]=1
 
 
 

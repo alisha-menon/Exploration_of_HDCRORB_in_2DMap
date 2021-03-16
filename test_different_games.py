@@ -106,7 +106,7 @@ def play_game_files(train_file,test_num,obstacle_dataset_file,goal_dataset_file,
         print('Writing result to ', stats_file)
 
     #return successes,crashes,stucks,mean_steps_success
-    return successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck, stuck_after_stuck,crash_after_stuck
+    return successes,crashes,stucks,mean_steps_success,triggered_x_stuck,triggered_y_stuck, stuck_after_stuck,crash_after_stuck, stuck_count
 
 
 #####################

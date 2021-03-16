@@ -5,10 +5,10 @@ train_file = './data/game_data_2state_based.out'
 # train_file='./data/game_data_random_goal.out'
 
 gametype = 1
-obstacles= 5
+obstacles= 15
 
 #Obstacle number (line number in the goal/env file) -- lines start with 0
-number=15
+number=45
 
 obstacle_dataset_file = './data/obstacles_' + str(obstacles) + '.csv'
 goal_dataset_file = './data/goals_' + str(obstacles) + '.csv'
@@ -21,6 +21,6 @@ goal_ids=list(goal_reader)
 
 print(test_ids)
 
-a = game_module('game_data_random_goal.out',obstacles)
+a = game_module('./data/testout.out',obstacles)
 a.train_from_file(train_file)
 a.play_display_game(gametype,[int(num) for num in test_ids[number]], [int(num) for num in goal_ids[number]])
