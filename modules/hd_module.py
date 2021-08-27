@@ -1137,7 +1137,7 @@ class hd_module:
 
         self.model = tf.keras.Sequential([
             tf.keras.layers.Dense(50, activation=tf.nn.relu, input_shape=(input_size,)),
-            tf.keras.layers.Dense(25, activation=tf.nn.relu),
+            tf.keras.layers.Dense(50, activation=tf.nn.relu),
             tf.keras.layers.Dense(output_size, activation=tf.nn.sigmoid)
         ])
 
@@ -1167,8 +1167,6 @@ class hd_module:
         dists = np.matmul(self.hd_actuator_vals, pred.T, dtype='float32')
         probs = softmax(dists/np.max(dists) * self.softmax_param)
 
-        print(probs)
-        print(np.shape(probs))
         return np.random.choice(4, p = probs.flatten())
 
     def train_sample_NN(self, sensor_in, act_in):
