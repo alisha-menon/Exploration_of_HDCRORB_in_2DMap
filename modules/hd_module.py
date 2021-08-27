@@ -21,7 +21,7 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 
 class hd_module:
-    def __init__(self, d):
+    def __init__(self, d=10000):
         # HD dimension used
         self.dim = d
         self.num_sensors = 7
@@ -35,8 +35,6 @@ class hd_module:
 
         self.threshold_known_only_x = 0.16
         self.threshold_known_only_y = 0.04
-
-        self.softmax_param = 7.79
 
         self.softmax_param_state1 = 10.12
         self.softmax_param_state2 = 10.12
@@ -167,6 +165,9 @@ class hd_module:
 
         self.ang_CiM = self.create_bipolar_CIM(3, self.dim)
         self.mag_CiM = self.create_bipolar_CIM(5, self.dim)
+
+    def set_softmax_param(self, s_p):
+        self.softmax_param = s_p
 
     def create_bipolar_mem(self, numitem, dim):
         # Creates random bipolar memory of given size
@@ -1136,16 +1137,16 @@ class hd_module:
         output_size = labels.shape[1]
 
         self.model = tf.keras.Sequential([
-            tf.keras.layers.Dense(50, activation=tf.nn.relu, input_shape=(input_size,)),
-            tf.keras.layers.Dense(50, activation=tf.nn.relu),
-            tf.keras.layers.Dense(output_size, activation=tf.nn.sigmoid)
+            tf.keras.layers.Dense(50, activation=tf.nn.tanh, input_shape=(input_size,)),
+            tf.keras.layers.Dense(50, activation=tf.nn.tanh),
+            tf.keras.layers.Dense(output_size, activation=tf.nn.tanh)
         ])
 
         self.model.compile(optimizer='adam',
                       loss=tf.keras.losses.cosine_similarity,
                       metrics=['accuracy'])
 
-        self.model.fit(features, labels, epochs = 2)
+        self.model.fit(features, labels, epochs = 3)
 
         return
 

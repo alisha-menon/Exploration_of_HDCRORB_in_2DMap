@@ -32,7 +32,7 @@ class game_module:
         self.steps = 0
         self.average_steps = 0
 
-        self.hd_module = hd_module(10000)
+        self.hd_module = hd_module()
         self.num_cond = self.hd_module.num_cond
         self.num_thrown = self.hd_module.num_thrown
 
@@ -172,7 +172,11 @@ class game_module:
         return
 
     def set_dim(self,d):
-        self.hd_module = hd_module(d)
+        self.hd_module = hd_module(d=d)
+        return
+
+    def set_softmax_param(self, s_p):
+        self.hd_module.set_softmax_param(s_p)
         return
 
     def set_sensor_weight(self,sensor_weight):
