@@ -1065,88 +1065,88 @@ class hd_module:
         # self.clf.fit(X_train, y_train)
         # self.clf.fit(sensor_vals, actuator_vals)
 
-        features = tf.convert_to_tensor(X_train)
-        labels = tf.convert_to_tensor(y_train)
+        # features = tf.convert_to_tensor(X_train)
+        # labels = tf.convert_to_tensor(y_train)
         # features = tf.convert_to_tensor(sensor_vals)
         # labels = tf.convert_to_tensor(actuator_vals)
         #
-        input_size = features.shape[1]
-        output_size = len(np.unique(labels))
-
-        self.model = tf.keras.Sequential([
-            tf.keras.layers.Dense(16, activation=tf.nn.relu, input_shape=(input_size,)),
-            tf.keras.layers.Dense(8, activation=tf.nn.relu),
-            tf.keras.layers.Dense(output_size)
-        ])
-
-        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-
-        optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
-
-        # Keep results for plotting
-        train_loss_results = []
-        train_accuracy_results = []
-
-        num_epochs = 11
-
-        for epoch in range(num_epochs):
-            epoch_loss_avg = tf.keras.metrics.Mean()
-            epoch_accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
-
-            # Optimize the model
-            loss_value, grads = self.grad(self.model, features, labels, loss_object)
-            optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
-
-            # Track progress
-            epoch_loss_avg.update_state(loss_value)  # Add current batch loss
-            # Compare predicted label to actual label
-            # training=True is needed only if there are layers with different
-            # behavior during training versus inference (e.g. Dropout).
-            epoch_accuracy.update_state(labels, self.model(features, training=True))
-
-            # End epoch
-            train_loss_results.append(epoch_loss_avg.result())
-            train_accuracy_results.append(epoch_accuracy.result())
-
-
-            if epoch % 50 == 0:
-                print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(epoch,
-                                                                        epoch_loss_avg.result(),
-                                                                        epoch_accuracy.result()))
-
-
-        # X_train = []
-        # y_train = []
-        # for sample in range(n_samples):
-        #     sample_vec, act = self.train_sample_NN(sensor_vals[sample,:],actuator_vals[sample])
-        #     if any(sample_vec):
-        #         X_train.append(sample_vec)
-        #         y_train.append(self.hd_actuator_vals[act])
-        #
-        # pickle_vectors = open('train_vectors.pckl', 'wb')
-        # pickle_actuators = open('train_actuators.pckl', 'wb')
-        # pickle.dump(X_train, pickle_vectors)
-        # pickle.dump(y_train, pickle_actuators)
-        # pickle_vectors.close()
-        # pickle_actuators.close()
-        #
-        # features = tf.convert_to_tensor(X_train, dtype='float32')
-        # labels = tf.convert_to_tensor(y_train, dtype='float32')
-        #
         # input_size = features.shape[1]
-        # output_size = labels.shape[1]
+        # output_size = len(np.unique(labels))
         #
         # self.model = tf.keras.Sequential([
-        #     tf.keras.layers.Dense(50, activation=tf.nn.tanh, input_shape=(input_size,)),
-        #     tf.keras.layers.Dense(25, activation=tf.nn.tanh),
-        #     tf.keras.layers.Dense(output_size, activation=tf.nn.tanh)
+        #     tf.keras.layers.Dense(16, activation=tf.nn.relu, input_shape=(input_size,)),
+        #     tf.keras.layers.Dense(8, activation=tf.nn.relu),
+        #     tf.keras.layers.Dense(output_size)
         # ])
         #
-        # self.model.compile(optimizer='adam',
-        #               loss=tf.keras.losses.cosine_similarity,
-        #               metrics=['accuracy'])
+        # loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         #
-        # self.model.fit(features, labels, epochs = 3)
+        # optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
+        #
+        # # Keep results for plotting
+        # train_loss_results = []
+        # train_accuracy_results = []
+        #
+        # num_epochs = 301
+        #
+        # for epoch in range(num_epochs):
+        #     epoch_loss_avg = tf.keras.metrics.Mean()
+        #     epoch_accuracy = tf.keras.metrics.SparseCategoricalAccuracy()
+        #
+        #     # Optimize the model
+        #     loss_value, grads = self.grad(self.model, features, labels, loss_object)
+        #     optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
+        #
+        #     # Track progress
+        #     epoch_loss_avg.update_state(loss_value)  # Add current batch loss
+        #     # Compare predicted label to actual label
+        #     # training=True is needed only if there are layers with different
+        #     # behavior during training versus inference (e.g. Dropout).
+        #     epoch_accuracy.update_state(labels, self.model(features, training=True))
+        #
+        #     # End epoch
+        #     train_loss_results.append(epoch_loss_avg.result())
+        #     train_accuracy_results.append(epoch_accuracy.result())
+        #
+        #
+        #     if epoch % 50 == 0:
+        #         print("Epoch {:03d}: Loss: {:.3f}, Accuracy: {:.3%}".format(epoch,
+        #                                                                 epoch_loss_avg.result(),
+        #                                                                 epoch_accuracy.result()))
+
+
+        X_train = []
+        y_train = []
+        for sample in range(n_samples):
+            sample_vec, act = self.train_sample_NN(sensor_vals[sample,:],actuator_vals[sample])
+            if any(sample_vec):
+                X_train.append(sample_vec)
+                y_train.append(self.hd_actuator_vals[act])
+
+        pickle_vectors = open('train_vectors.pckl', 'wb')
+        pickle_actuators = open('train_actuators.pckl', 'wb')
+        pickle.dump(X_train, pickle_vectors)
+        pickle.dump(y_train, pickle_actuators)
+        pickle_vectors.close()
+        pickle_actuators.close()
+
+        features = tf.convert_to_tensor(X_train, dtype='float32')
+        labels = tf.convert_to_tensor(y_train, dtype='float32')
+
+        input_size = features.shape[1]
+        output_size = labels.shape[1]
+
+        self.model = tf.keras.Sequential([
+            tf.keras.layers.Dense(50, activation=tf.nn.tanh, input_shape=(input_size,)),
+            tf.keras.layers.Dense(25, activation=tf.nn.tanh),
+            tf.keras.layers.Dense(output_size, activation=tf.nn.tanh)
+        ])
+
+        self.model.compile(optimizer='adam',
+                      loss=tf.keras.losses.cosine_similarity,
+                      metrics=['accuracy'])
+
+        self.model.fit(features, labels, epochs = 3)
 
         return
 
@@ -1160,15 +1160,15 @@ class hd_module:
         # sensor_in = sensor_in[:50]
         # return self.clf.predict([sensor_in])[0]
 
-        sensor_in = np.array(sensor_in)
-        pred = self.model.predict(sensor_in[:, None].T)
-        probs = softmax(pred/np.max(pred) * self.softmax_param)
-        return np.random.choice(4, p = probs.flatten())
-
-        # pred = self.model.predict(np.array([sensor_in,]))
-        # dists = np.matmul(self.hd_actuator_vals, pred.T, dtype='float32')
-        # probs = softmax(dists/np.max(dists) * self.softmax_param)
+        # sensor_in = np.array(sensor_in)
+        # pred = self.model.predict(sensor_in[:, None].T)
+        # probs = softmax(pred/np.max(pred) * self.softmax_param)
         # return np.random.choice(4, p = probs.flatten())
+
+        pred = self.model.predict(np.array([sensor_in,]))
+        dists = np.matmul(self.hd_actuator_vals, pred.T, dtype='float32')
+        probs = softmax(dists/np.max(dists) * self.softmax_param)
+        return np.random.choice(4, p = probs.flatten())
 
     def train_sample_NN(self, sensor_in, act_in):
         # Multiply encoded sensor vector with actuator vector

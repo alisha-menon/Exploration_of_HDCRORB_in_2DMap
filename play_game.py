@@ -35,7 +35,7 @@ elif live==4:
     count = int(input("Enter the number of testing loops\n"))
     a.train_from_file_NN(train_file)
     a.num_obs = 10
-    softmax = [6.5, 7]
+    softmax = [7.54, 7.56]
 
     for s in softmax:
         a.set_softmax_param(s)
