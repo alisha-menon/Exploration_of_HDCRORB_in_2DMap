@@ -1,5 +1,5 @@
 from modules.game_module import game_module
-
+import numpy as np
 train_file = './data/game_data_2state_based.out'
 # train_file='./data/game_data_random_goal.out'
 
@@ -19,23 +19,34 @@ elif live==2:
     a.train_from_file_NN(train_file)
     a.autoplay_game(gametype, True)
 elif live==3:
+    # count = int(input("Enter the number of testing loops\n"))
+    # num = ['5', '10', '15', '20']
+    # a.train_from_file(train_file)
+    # for n in num:
+    #     a.num_obs = int(n)
+    #     a.play_game_from_file('./data/obstacles_' + n + '.csv', './data/goals_' + n + '.csv', False, count)
     count = int(input("Enter the number of testing loops\n"))
-    num = ['5', '10', '15', '20']
     a.train_from_file(train_file)
-    for n in num:
-        a.num_obs = int(n)
-        a.play_game_from_file('./data/obstacles_' + n + '.csv', './data/goals_' + n + '.csv', False, count)
+    a.num_obs = 20
+    softmax = np.arange(5.5,7,0.02)
+    accs = []
+    for s in softmax:
+        a.set_softmax_param(s)
+        a.play_game_from_file('./data/obstacles_' + '20' + '.csv', './data/goals_' + '20' + '.csv', False, count)
+        accs.append(a.final_accuracy)
+    print(accs)
 elif live==4:
     # num = ['5', '10', '15', '20']
     # count = int(input("Enter the number of testing loops\n"))
     # a.train_from_file_NN(train_file)
+    # a.set_softmax_param(7.5)
     # for n in num:
     #     a.num_obs = int(n)
     #     a.play_game_from_file('./data/obstacles_' + n + '.csv', './data/goals_' + n + '.csv', True, count)
     count = int(input("Enter the number of testing loops\n"))
     a.train_from_file_NN(train_file)
     a.num_obs = 10
-    softmax = [7.54, 7.56]
+    softmax = [7.7, 7.75]
 
     for s in softmax:
         a.set_softmax_param(s)

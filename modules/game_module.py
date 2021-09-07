@@ -62,6 +62,8 @@ class game_module:
         else:
             self.goal_pos = goal_id
         self.steps = 0
+
+        self.final_accuracy = 0
         return
 
     def train_from_file(self, filename):
@@ -173,10 +175,6 @@ class game_module:
 
     def set_dim(self,d):
         self.hd_module = hd_module(d=d)
-        return
-
-    def set_softmax_param(self, s_p):
-        self.hd_module.set_softmax_param(s_p)
         return
 
     def set_sensor_weight(self,sensor_weight):
@@ -950,6 +948,7 @@ class game_module:
         print("success: {} \t crash: {} \t stuck: {} \t time: {} \t average steps: {} \t total x_stuck: {} \t total y_stuck {}".format(np.mean(su), np.mean(c), np.mean(stu), np.mean(t), np.mean(ste), np.mean(xstu), np.mean(ystu)))
         # print("success rate: {:.2f}".format(success/(success+crash+stuck)))
         # print('step count ', len(step_count), len(crash_count),len(stuck_count))
+        self.final_accuracy = su
         return su, c, stu, t, ste, xstu, ystu
             #return success,crash,stuck,step_count, crash_count, stuck_count, diagnose
 

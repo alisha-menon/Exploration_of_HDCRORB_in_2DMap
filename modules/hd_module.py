@@ -28,7 +28,7 @@ class hd_module:
         self.num_actuators = 4
         self.sensor_weight = 1
 
-        self.threshold_known = 0.08
+        self.threshold_known = 0.05
 
         self.threshold_known_state1 = 0.16
         self.threshold_known_state2 = 0.04
@@ -36,6 +36,7 @@ class hd_module:
         self.threshold_known_only_x = 0.16
         self.threshold_known_only_y = 0.04
 
+        self.softmax_param = 7.79
         self.softmax_param_state1 = 10.12
         self.softmax_param_state2 = 10.12
 
@@ -1054,13 +1055,13 @@ class hd_module:
         #     sensor_vals[i][4] = math.atan2(delta_y, delta_x)
         #     sensor_vals[i][5] = np.sqrt(np.power(delta_x, 2) + np.power(delta_y, 2))
 
-        X_train = []
-        y_train = []
-        for sample in range(n_samples):
-            sample_vec, act = self.train_sample_NN(sensor_vals[sample,:],actuator_vals[sample])
-            if any(sample_vec):
-                X_train.append(sample_vec)
-                y_train.append(act)
+        # X_train = []
+        # y_train = []
+        # for sample in range(n_samples):
+        #     sample_vec, act = self.train_sample_NN(sensor_vals[sample,:],actuator_vals[sample])
+        #     if any(sample_vec):
+        #         X_train.append(sample_vec)
+        #         y_train.append(act)
         #
         # self.clf.fit(X_train, y_train)
         # self.clf.fit(sensor_vals, actuator_vals)
