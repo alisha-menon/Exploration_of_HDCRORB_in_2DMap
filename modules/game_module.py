@@ -173,7 +173,7 @@ class game_module:
         f.close()
         return
 
-    def set_dim(self,d):
+    def set_dim(self, d):
         self.hd_module = hd_module(d=d)
         return
 

@@ -24,6 +24,7 @@ class hd_module:
     def __init__(self, d=10000):
         # HD dimension used
         self.dim = d
+
         self.num_sensors = 7
         self.num_actuators = 4
         self.sensor_weight = 1
