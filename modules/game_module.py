@@ -1,5 +1,6 @@
 import pygame
 import random
+random.seed(1)
 import numpy as np
 import os
 import csv

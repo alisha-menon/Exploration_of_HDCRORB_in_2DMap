@@ -25,33 +25,36 @@ elif live==3:
     # for n in num:
     #     a.num_obs = int(n)
     #     a.play_game_from_file('./data/obstacles_' + n + '.csv', './data/goals_' + n + '.csv', False, count)
+
     count = int(input("Enter the number of testing loops\n"))
-    a.train_from_file(train_file)
-    a.num_obs = 20
-    softmax = np.arange(5.5,7,0.02)
-    accs = []
-    for s in softmax:
-        a.set_softmax_param(s)
-        a.play_game_from_file('./data/obstacles_' + '20' + '.csv', './data/goals_' + '20' + '.csv', False, count)
-        accs.append(a.final_accuracy)
-    print(accs)
+    a.num_obs = 15
+    dims = [50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+    a.set_softmax_param(7.79)
+
+    for d in dims:
+        a.set_dim(d)
+        a.train_from_file(train_file)
+        a.play_game_from_file('./data/obstacles_' + '15' + '.csv', './data/goals_' + '15' + '.csv', False, count)
+        print('STD: ', np.std(a.final_accuracy))
 elif live==4:
     # num = ['5', '10', '15', '20']
     # count = int(input("Enter the number of testing loops\n"))
     # a.train_from_file_NN(train_file)
-    # a.set_softmax_param(6.4)
+    # a.set_softmax_param(7.5)
     # for n in num:
     #     a.num_obs = int(n)
     #     a.play_game_from_file('./data/obstacles_' + n + '.csv', './data/goals_' + n + '.csv', True, count)
     count = int(input("Enter the number of testing loops\n"))
     a.set_softmax_param(7.5)
     a.num_obs = 15
-    dims = [50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+    # dims = [50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000]
+    # dims = [10000]
 
     for d in dims:
         a.set_dim(d)
         a.train_from_file_NN(train_file)
         a.play_game_from_file('./data/obstacles_' + '15' + '.csv', './data/goals_' + '15' + '.csv', True, count)
+        print('STD: ', np.std(a.final_accuracy))
 
 
 

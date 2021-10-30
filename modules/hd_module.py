@@ -5,19 +5,19 @@ import pickle
 import math
 from scipy.special import softmax
 
-from sklearn import svm
+# from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import GradientBoostingClassifier
+# from sklearn.ensemble import ExtraTreesClassifier
+# from sklearn.tree import DecisionTreeClassifier
+# from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import BaggingClassifier
-from sklearn import neighbors
-from sklearn.linear_model import SGDClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.model_selection import train_test_split
-
+# from sklearn import neighbors
+# from sklearn.linear_model import SGDClassifier
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.neural_network import MLPClassifier
+# from sklearn.naive_bayes import GaussianNB
+# from sklearn.model_selection import train_test_split
+#
 import tensorflow as tf
 
 class hd_module:
@@ -157,7 +157,7 @@ class hd_module:
         # self.clf = DecisionTreeClassifier()
         # self.clf = GradientBoostingClassifier()
         # self.clf = BaggingClassifier()
-        self.clf = BaggingClassifier(RandomForestClassifier())
+        # self.clf = BaggingClassifier(RandomForestClassifier())
         # self.clf = neighbors.KNeighborsClassifier()
         # self.clf = SGDClassifier()
         # self.clf = MLPClassifier()
@@ -1056,22 +1056,22 @@ class hd_module:
         #     sensor_vals[i][4] = math.atan2(delta_y, delta_x)
         #     sensor_vals[i][5] = np.sqrt(np.power(delta_x, 2) + np.power(delta_y, 2))
 
-        # X_train = []
-        # y_train = []
-        # for sample in range(n_samples):
-        #     sample_vec, act = self.train_sample_NN(sensor_vals[sample,:],actuator_vals[sample])
-        #     if any(sample_vec):
-        #         X_train.append(sample_vec)
-        #         y_train.append(act)
-        #
+        X_train = []
+        y_train = []
+        for sample in range(n_samples):
+            sample_vec, act = self.train_sample_NN(sensor_vals[sample,:],actuator_vals[sample])
+            if any(sample_vec):
+                X_train.append(sample_vec)
+                y_train.append(act)
+
         # self.clf.fit(X_train, y_train)
         # self.clf.fit(sensor_vals, actuator_vals)
 
-        # features = tf.convert_to_tensor(X_train)
-        # labels = tf.convert_to_tensor(y_train)
+        features = tf.convert_to_tensor(X_train)
+        labels = tf.convert_to_tensor(y_train)
         # features = tf.convert_to_tensor(sensor_vals)
         # labels = tf.convert_to_tensor(actuator_vals)
-        #
+
         # input_size = features.shape[1]
         # output_size = len(np.unique(labels))
         #
@@ -1082,7 +1082,6 @@ class hd_module:
         # ])
         #
         # loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        #
         # optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
         #
         # # Keep results for plotting
