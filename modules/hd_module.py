@@ -227,9 +227,8 @@ class hd_module:
         #return (np.greater_equal(A,0, dtype=np.int8)*2-1)
         return (np.int8(np.greater_equal(A,0))*2-1)
 
-
     def search_actuator_vals(self, A):
-        # Find the nearest item in 'hd_actuator_vals' according to Hamming distance
+        # Find the nearest item in 'hd_actuator_vals' according to Inner product distance
         # inputs:
         #   - A: bipolar HD vector
         # outputs:
@@ -237,9 +236,8 @@ class hd_module:
         dists = np.matmul(self.hd_actuator_vals, A, dtype = np.int)
         return np.argmax(dists)
 
-
     def search_x_actuator_vals(self, A):
-        # Find the nearest item in 'hd_actuator_vals' according to Hamming distance
+        # Find the nearest item in 'hd_actuator_vals' according to Inner Product distance
         # inputs:
         #   - A: bipolar HD vector
         # outputs:
@@ -248,7 +246,7 @@ class hd_module:
         return np.argmax(dists)
 
     def search_y_actuator_vals(self, A):
-        # Find the nearest item in 'hd_actuator_vals' according to Hamming distance
+        # Find the nearest item in 'hd_actuator_vals' according to Inner Product distance
         # inputs:
         #   - A: bipolar HD vector
         # outputs:
@@ -257,7 +255,8 @@ class hd_module:
         return np.argmax(dists)
 
     def softmax_actuator_vals(self, A, softmax_param):
-        # Find the nearest item in 'hd_actuator_vals' according to Hamming distance
+        # Probabilisticly chooses an hd vector from 'hd_actuator_vals' according 
+        # to probabilities defined by the Inner Product distance
         # inputs:
         #   - A: bipolar HD vector
         # outputs:
